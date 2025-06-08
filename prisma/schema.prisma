@@ -1,0 +1,142 @@
+// This is your Prisma schema file
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============== USUÁRIOS ==============
+
+model Admin {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  password  String
+  avatar    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ============== PLANOS ==============
+
+model Plan {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  price       Decimal  @db.Decimal(10, 2)
+  duration    Int
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relacionamentos
+  students Student[]
+}
+
+// ============== ALUNOS ==============
+
+model Student {
+  id          String      @id @default(cuid())
+  name        String
+  email       String      @unique
+  password    String
+  phone       String
+  birthDate   DateTime
+  cpf         String?
+  height      Float?
+  weight      Float?
+  bodyFat     Float?
+  isActive    Boolean     @default(true)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  planId         String
+  plan           Plan          @relation(fields: [planId], references: [id])
+  paymentStatus  PaymentStatus @default(PENDING)
+
+  workouts       StudentWorkout[]
+}
+
+enum PaymentStatus {
+  PAID     // Pagamento confirmado
+  UNPAID   // Não pago
+  PENDING  // Aguardando confirmação
+}
+
+// ============== EXERCÍCIOS ==============
+
+model Exercise {
+  id           String   @id @default(cuid())
+  name         String
+  targetMuscle String
+  imageUrl     String?
+  videoUrl     String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  workoutExercises WorkoutExercise[]
+}
+
+// ============== TREINOS ==============
+
+model Workout {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  isFavorite  Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  exercises       WorkoutExercise[]
+  studentWorkouts StudentWorkout[]
+}
+
+model WorkoutExercise {
+  id         String @id @default(cuid())
+  workoutId  String
+  exerciseId String
+  sets       Int
+  reps       String
+  weight     String?
+  rest       String?
+  notes      String?
+  order      Int
+
+  workout  Workout  @relation(fields: [workoutId], references: [id], onDelete: Cascade)
+  exercise Exercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+
+  @@unique([workoutId, exerciseId, order])
+}
+
+model StudentWorkout {
+  id        String @id @default(cuid())
+  studentId String
+  workoutId String
+  dayOfWeek Int
+  isActive  Boolean @default(true)
+
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  workout Workout @relation(fields: [workoutId], references: [id], onDelete: Cascade)
+
+  @@unique([studentId, workoutId, dayOfWeek])
+}
+
+
+// ============== ESTATÍSTICAS ==============
+
+model MonthlyStats {
+  id            String   @id @default(cuid())
+  month         Int
+  year          Int
+  totalStudents Int      @default(0)
+  newStudents   Int      @default(0)
+  revenue       Decimal  @db.Decimal(10, 2) @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@unique([month, year])
+}
