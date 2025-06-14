@@ -1,5 +1,4 @@
 import { getCurrentAdmin } from '@/lib/auth'
-import Sidebar from '@/components/ui/Sidebar'
 import { redirect } from 'next/navigation'
 
 export default async function DashboardPage() {
@@ -9,11 +8,8 @@ export default async function DashboardPage() {
     redirect('/login')
   }
 
-  return (
-    <div className="flex h-screen bg-gray-100">
-      <Sidebar admin={admin} />
-      
-      <main className="flex-1 overflow-auto">
+  return (     
+    <> 
         <div className="p-6">
           <div className="mb-6">
             <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
@@ -76,7 +72,6 @@ export default async function DashboardPage() {
             </div>
           </div>
         </div>
-      </main>
-    </div>
+      </>
   )
 }
