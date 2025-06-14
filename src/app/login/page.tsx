@@ -2,6 +2,10 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -41,50 +45,54 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-12 sm:px-6 lg:px-8">
-      <div className="w-full max-w-md space-y-8">
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Login Admin
+    <div className="flex min-h-screen items-center justify-center gap-3 bg-[url('/bg.png')] bg-cover bg-center bg-no-repeat px-4 py-12 sm:px-6 lg:px-8">
+      <div className="w-full max-w-lg space-y-8 rounded-3xl bg-black px-3 py-6 shadow-lg md:px-5 md:py-10">
+        <div className="flex flex-col gap-3 text-center">
+          <h2 className="text-xl font-semibold text-white sm:text-3xl md:text-4xl">
+            Faça o login na sua conta
           </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
-            Sistema de Gerenciamento da Academia
+          <p className="text-sm text-gray-400 sm:text-base md:text-lg">
+            Faça o login para começar a criar treinos e dietas para seus alunos.
           </p>
         </div>
 
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+        <div className="space-y-6">
           {error && (
-            <div className="rounded border border-red-400 bg-red-100 px-4 py-3 text-red-700">
-              {error}
-            </div>
+            <Alert variant="destructive">
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
           )}
 
-          <div className="-space-y-px rounded-md shadow-sm">
-            <div>
-              <label htmlFor="email" className="sr-only">
-                Email
-              </label>
-              <input
+          <div className="space-y-5">
+            <div className="space-y-2">
+              <Label
+                htmlFor="email"
+                className="block text-sm font-medium text-white sm:text-base lg:text-lg"
+              >
+                Seu email
+              </Label>
+              <Input
                 id="email"
                 name="email"
                 type="email"
                 required
-                className="relative block w-full appearance-none rounded-none rounded-t-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:z-10 focus:border-indigo-500 focus:ring-indigo-500 focus:outline-none sm:text-sm"
                 placeholder="Email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
             </div>
             <div>
-              <label htmlFor="password" className="sr-only">
-                Senha
-              </label>
-              <input
+              <Label
+                htmlFor="password"
+                className="block text-sm font-medium text-white sm:text-base lg:text-lg"
+              >
+                Sua senha
+              </Label>
+              <Input
                 id="password"
                 name="password"
                 type="password"
                 required
-                className="relative block w-full appearance-none rounded-none rounded-b-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:z-10 focus:border-indigo-500 focus:ring-indigo-500 focus:outline-none sm:text-sm"
                 placeholder="Senha"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -93,25 +101,27 @@ export default function LoginPage() {
           </div>
 
           <div>
-            <button
+            <Button
               type="submit"
               disabled={isLoading}
-              className="group relative flex w-full justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+              className="h-10 w-full rounded-[8px] text-base font-semibold text-white transition-colors duration-200 focus:ring-2 sm:h-12 sm:text-xl"
+              onClick={handleSubmit}
             >
               {isLoading ? "Entrando..." : "Entrar"}
-            </button>
+            </Button>
           </div>
 
           <div className="text-center">
-            <button
+            <Button
               type="button"
-              className="text-sm text-indigo-600 hover:text-indigo-500"
+              variant="link"
+              className="text-primary hover:text-primary/80 h-auto p-0 text-xs focus-visible:underline focus-visible:ring-0 sm:text-sm"
               onClick={() => alert("Funcionalidade em desenvolvimento")}
             >
               Esqueceu sua senha?
-            </button>
+            </Button>
           </div>
-        </form>
+        </div>
       </div>
     </div>
   );
