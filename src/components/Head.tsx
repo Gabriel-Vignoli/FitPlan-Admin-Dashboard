@@ -16,10 +16,10 @@ export default function Head({
   icon,
 }: HeadProps) {
   return (
-    <div className="mb-6 flex items-center justify-between">
+    <div className="mb-6 md:flex md:items-center md:justify-between space-y-5">
       <div className="flex flex-col">
-        <h1 className="text-3xl font-semibold">{title}</h1>
-        <p className="text-white/80">{description}</p>
+        <h1 className="text-xl sm:text-2xl md:text-3xl font-semibold">{title}</h1>
+        <p className="text-white/80 text-sm sm:text-base ">{description}</p>
       </div>
 
       <Button variant={buttonVariant} className="text-white">
