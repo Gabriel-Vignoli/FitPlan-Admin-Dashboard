@@ -77,7 +77,7 @@ export default function Sidebar({ admin }: SidebarProps) {
   const SidebarContent = () => (
     <div className="flex w-64 flex-col border-r-1 border-white/30 bg-[#070707] shadow-lg space-y-3 h-full">
       {/* Logo */}
-      <div className="flex items-center justify-center border-b border-white/30 p-4">
+      <div className="flex items-center justify-center border-b border-white/30 p-4 cursor-pointer">
         <Image
           src="/gym-logo-name.svg"
           alt="Logo Acadenua"
@@ -93,7 +93,7 @@ export default function Sidebar({ admin }: SidebarProps) {
             <li key={item.path}>
               <button
                 onClick={() => handleMenuItemClick(item.path)}
-                className={`flex w-full items-center space-x-3 rounded-[8px] px-4 py-4 text-left transition-colors ${
+                className={`flex w-full items-center space-x-3 rounded-[8px] px-4 py-4 text-left transition-colors cursor-pointer ${
                   pathname === item.path ? "bg-primary" : "hover:bg-primary/60"
                 }`}
               >
