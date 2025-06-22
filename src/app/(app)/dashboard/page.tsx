@@ -1,72 +1,134 @@
-import Head from '@/components/Head'
-import { getCurrentAdmin } from '@/lib/auth'
-import { Plus } from 'lucide-react'
-import { redirect } from 'next/navigation'
+import Head from "@/components/Head";
+import StatCard from "@/components/StatCard";
+import { getCurrentAdmin } from "@/lib/auth";
+import { Plus } from "lucide-react";
+import { redirect } from "next/navigation";
 
 export default async function DashboardPage() {
-  const admin = await getCurrentAdmin()
-  
+  const admin = await getCurrentAdmin();
+
   if (!admin) {
-    redirect('/login')
+    redirect("/login");
   }
 
-  return (     
-    <> 
-        <div className="p-8">
-          <Head buttonText='Adicionar Aluno' buttonVariant='default' title={`Bem-vindo ${admin.name}`} description='Descubra padrões, otimize treinos e acompanhe o fluxo da academia!' icon={<Plus></Plus>}></Head>
+  // Sample data for the charts (you can replace with real data)
+  const totalUsersData = [
+    { value: 120 },
+    { value: 135 },
+    { value: 125 },
+    { value: 145 },
+    { value: 160 },
+    { value: 155 },
+    { value: 170 },
+    { value: 165 },
+    { value: 174 },
+    { value: 174 },
+  ];
 
-          {/* Estatísticas */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <div className="bg-white p-6 rounded-lg shadow">
-              <h3 className="text-lg font-semibold text-gray-900">Total de Usuários</h3>
-              <p className="text-3xl font-bold text-indigo-600 mt-2">0</p>
-              <p className="text-sm text-gray-500 mt-1">+0% do mês passado</p>
-            </div>
-            
-            <div className="bg-white p-6 rounded-lg shadow">
-              <h3 className="text-lg font-semibold text-gray-900">Novos Usuários</h3>
-              <p className="text-3xl font-bold text-green-600 mt-2">0</p>
-              <p className="text-sm text-gray-500 mt-1">+0% do mês passado</p>
-            </div>
-            
-            <div className="bg-white p-6 rounded-lg shadow">
-              <h3 className="text-lg font-semibold text-gray-900">Lucro do Mês</h3>
-              <p className="text-3xl font-bold text-purple-600 mt-2">R$ 0,00</p>
-              <p className="text-sm text-gray-500 mt-1">+0% do mês passado</p>
-            </div>
-          </div>
+  const newUsersData = [
+    { value: 20 },
+    { value: 18 },
+    { value: 22 },
+    { value: 19 },
+    { value: 17 },
+    { value: 15 },
+    { value: 18 },
+    { value: 16 },
+    { value: 14 },
+    { value: 16 },
+  ];
 
-          {/* Treinos Favoritos */}
-          <div className="bg-white rounded-lg shadow mb-8">
-            <div className="p-6 border-b">
-              <h2 className="text-xl font-semibold text-gray-900">Treinos Favoritos</h2>
-            </div>
-            <div className="p-6">
-              <p className="text-gray-500">Nenhum treino favorito encontrado</p>
-            </div>
-          </div>
+  return (
+      <div className="p-8">
+        <Head
+          buttonText="Adicionar Aluno"
+          buttonVariant="default"
+          title={`Bem-vindo ${admin.name}`}
+          description="Descubra padrões, otimize treinos e acompanhe o fluxo da academia!"
+          icon={<Plus></Plus>}
+        ></Head>
 
-          {/* Sobre os Alunos */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="bg-white rounded-lg shadow">
-              <div className="p-6 border-b">
-                <h3 className="text-lg font-semibold text-gray-900">Novos Alunos</h3>
-              </div>
-              <div className="p-6">
-                <p className="text-gray-500">Nenhum aluno novo encontrado</p>
-              </div>
-            </div>
-            
-            <div className="bg-white rounded-lg shadow">
-              <div className="p-6 border-b">
-                <h3 className="text-lg font-semibold text-gray-900">Alunos Mais Fiéis</h3>
-              </div>
-              <div className="p-6">
-                <p className="text-gray-500">Nenhum aluno encontrado</p>
-              </div>
-            </div>
+        {/* Estatísticas */}
+        <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <StatCard
+            title="Total de Usuários"
+            value="174"
+            percentage="12%"
+            chartData={totalUsersData}
+            chartColor="#10b981"
+            isPositive={true}
+          />
+
+          <StatCard
+            title="Novos Usuários"
+            value="16"
+            percentage="2%"
+            chartData={newUsersData}
+            chartColor="#ef4444"
+            isPositive={false}
+          />
+
+          <div className="md:col-span-2 lg:col-span-1">
+            <StatCard
+              title="Lucro do Mês"
+              value="7000"
+              percentage="5%"
+              chartData={totalUsersData}
+              chartColor="#10b981"
+              isPositive={true}
+            />
           </div>
         </div>
-      </>
-  )
+      
+
+      <div className="rounded-lg bg-white p-6 shadow">
+        <h3 className="text-lg font-semibold text-gray-900">Novos Usuários</h3>
+        <p className="mt-2 text-3xl font-bold text-green-600">0</p>
+        <p className="mt-1 text-sm text-gray-500">+0% do mês passado</p>
+      </div>
+
+      <div className="rounded-lg bg-white p-6 shadow">
+        <h3 className="text-lg font-semibold text-gray-900">Lucro do Mês</h3>
+        <p className="mt-2 text-3xl font-bold text-purple-600">R$ 0,00</p>
+        <p className="mt-1 text-sm text-gray-500">+0% do mês passado</p>
+      </div>
+
+      {/* Treinos Favoritos */}
+      <div className="mb-8 rounded-lg bg-white shadow">
+        <div className="border-b p-6">
+          <h2 className="text-xl font-semibold text-gray-900">
+            Treinos Favoritos
+          </h2>
+        </div>
+        <div className="p-6">
+          <p className="text-gray-500">Nenhum treino favorito encontrado</p>
+        </div>
+      </div>
+
+      {/* Sobre os Alunos */}
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+        <div className="rounded-lg bg-white shadow">
+          <div className="border-b p-6">
+            <h3 className="text-lg font-semibold text-gray-900">
+              Novos Alunos
+            </h3>
+          </div>
+          <div className="p-6">
+            <p className="text-gray-500">Nenhum aluno novo encontrado</p>
+          </div>
+        </div>
+
+        <div className="rounded-lg bg-white shadow">
+          <div className="border-b p-6">
+            <h3 className="text-lg font-semibold text-gray-900">
+              Alunos Mais Fiéis
+            </h3>
+          </div>
+          <div className="p-6">
+            <p className="text-gray-500">Nenhum aluno encontrado</p>
+          </div>
+        </div>
+      </div>
+      </div>
+  );
 }
