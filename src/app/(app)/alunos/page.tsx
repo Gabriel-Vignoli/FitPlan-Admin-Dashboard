@@ -1,11 +1,16 @@
-'use client'
+"use client";
 
+import Head from "@/components/Head";
+import AlunosTable from "@/components/AlunosTable";
+import { Plus } from "lucide-react";
 import { useEffect, useState } from "react";
 
 interface Aluno {
-  id: string; 
+  id: string;
   name: string;
-  createdAt?: string;
+  email: string;
+  createdAt: string;
+  paymentStatus: string;
 }
 
 export default function AlunosPage() {
@@ -25,7 +30,8 @@ export default function AlunosPage() {
         const data = await response.json();
         setAlunos(data);
       } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
+        const errorMessage =
+          err instanceof Error ? err.message : "An unknown error occurred";
         setError(errorMessage);
       } finally {
         setLoading(false);
@@ -35,22 +41,43 @@ export default function AlunosPage() {
     fetchAlunos();
   }, []);
 
+
   if (loading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="p-8">
+        <div className="flex items-center justify-center h-64">
+          <div className="text-white/70">Carregando alunos...</div>
+        </div>
+      </div>
+    );
   }
-  
+
   if (error) {
-    return <div>Error: {error}</div>;
+    return (
+      <div className="p-8">
+        <div className="rounded-[8px] border border-red-500/30 bg-red-500/10 p-4">
+          <p className="text-red-400">Erro ao carregar alunos: {error}</p>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div>
-      <h1>Alunos</h1>
-      {alunos.map((aluno) => (
-        <div key={aluno.id} className="p-4 border-b">   
-          <h2 className="text-lg font-semibold">{aluno.name}</h2>
+    <div className="p-8">
+      <div className="mb-10">
+        <Head
+          buttonText="Adicionar Aluno"
+          title="Gerenciar Alunos"
+          description="Adicione, exclua, edite alunos e também adicione seus treinos"
+          icon={<Plus />}
+          margin={5}
+        />
+        <div className="mt-5 min-w-full rounded-[8px] border border-white/30 bg-[#151515] px-4 py-2 text-white/30">
+          Procurar Aluno
         </div>
-      ))}
+      </div>
+
+      <AlunosTable alunos={alunos} />
     </div>
   );
 }
