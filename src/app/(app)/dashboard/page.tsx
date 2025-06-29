@@ -81,18 +81,6 @@ export default async function DashboardPage() {
         </div>
       
 
-      <div className="rounded-lg bg-white p-6 shadow">
-        <h3 className="text-lg font-semibold text-gray-900">Novos Usuários</h3>
-        <p className="mt-2 text-3xl font-bold text-green-600">0</p>
-        <p className="mt-1 text-sm text-gray-500">+0% do mês passado</p>
-      </div>
-
-      <div className="rounded-lg bg-white p-6 shadow">
-        <h3 className="text-lg font-semibold text-gray-900">Lucro do Mês</h3>
-        <p className="mt-2 text-3xl font-bold text-purple-600">R$ 0,00</p>
-        <p className="mt-1 text-sm text-gray-500">+0% do mês passado</p>
-      </div>
-
       {/* Treinos Favoritos */}
       <div className="mb-8 rounded-lg bg-white shadow">
         <div className="border-b p-6">
