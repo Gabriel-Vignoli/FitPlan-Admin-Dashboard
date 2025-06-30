@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Button } from "./ui/button";
 
 interface HeadProps {
@@ -7,6 +8,7 @@ interface HeadProps {
   buttonVariant?: "default" | "destructive";
   icon?: React.ReactNode;
   margin?: number;
+  pageLink?: string;
 }
 
 export default function Head({
@@ -15,7 +17,8 @@ export default function Head({
   buttonText,
   buttonVariant,
   icon,
-  margin = 6
+  margin = 6,
+  pageLink
 }: HeadProps) {
   return (
     <div className={`mb-${margin} md:flex md:items-center md:justify-between space-y-5 gap-5 md:gap-0`}>
@@ -24,10 +27,19 @@ export default function Head({
         <p className="text-white/80 text-sm sm:text-base ">{description}</p>
       </div>
 
-      <Button variant={buttonVariant} className="text-white">
-        {icon}
-        {buttonText}
-      </Button>
+      {pageLink ? (
+        <Link href={pageLink}>
+          <Button variant={buttonVariant} className="text-white">
+            {icon}
+            {buttonText}
+          </Button>
+        </Link>
+      ) : (
+        <Button variant={buttonVariant} className="text-white">
+          {icon}
+          {buttonText}
+        </Button>
+      )}
     </div>
   );
 }

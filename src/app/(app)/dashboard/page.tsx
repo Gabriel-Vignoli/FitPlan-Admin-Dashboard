@@ -46,6 +46,7 @@ export default async function DashboardPage() {
           title={`Bem-vindo ${admin.name}`}
           description="Descubra padrões, otimize treinos e acompanhe o fluxo da academia!"
           icon={<Plus></Plus>}
+          pageLink="/alunos/add"
         ></Head>
 
         {/* Estatísticas */}

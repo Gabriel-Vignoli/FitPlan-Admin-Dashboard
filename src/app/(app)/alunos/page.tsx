@@ -71,6 +71,7 @@ export default function AlunosPage() {
           description="Adicione, exclua, edite alunos e também adicione seus treinos"
           icon={<Plus />}
           margin={5}
+          pageLink="/alunos/add"
         />
         <div className="mt-5 min-w-full rounded-[8px] border border-white/30 bg-[#151515] px-4 py-2 text-white/30">
           Procurar Aluno
