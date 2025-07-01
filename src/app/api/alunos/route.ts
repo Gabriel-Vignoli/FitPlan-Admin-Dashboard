@@ -6,7 +6,7 @@ import {
   isValidCPF,
   isValidEmail,
   isValidPhone,
-} from "@/lib/validations";
+} from "@/lib/utils/validations";
 
 // Find all users
 export async function GET() {
@@ -15,6 +15,18 @@ export async function GET() {
       orderBy: {
         createdAt: "desc",
       },
+      select: {
+        id: true,
+        name: true,
+        phone: true,
+        createdAt: true,
+        paymentStatus: true,
+        plan: {
+          select: {
+            name: true
+          }
+        }
+      }
     });
 
     return NextResponse.json(alunos);

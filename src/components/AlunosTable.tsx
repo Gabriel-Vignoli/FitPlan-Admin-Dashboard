@@ -6,13 +6,23 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  formatDate,
+  formatPhone,
+  getInitials,
+  getStatusStyle,
+  getStatusText,
+} from "@/lib/utils/formatters";
 
 interface Aluno {
   id: string;
   name: string;
-  email: string;
+  phone: string;
   createdAt: string;
   paymentStatus: string;
+  plan: {
+    name: string;
+  };
 }
 
 interface AlunosTableProps {
@@ -20,44 +30,6 @@ interface AlunosTableProps {
 }
 
 export default function AlunosTable({ alunos }: AlunosTableProps) {
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("pt-BR");
-  };
-
-  const getStatusStyle = (status: string) => {
-    switch (status.toLowerCase()) {
-      case "paid":
-        return "bg-green-500/20 text-green-400";
-      case "pending":
-        return "bg-yellow-500/20 text-yellow-400";
-      case "unpaid":
-        return "bg-red-500/20 text-red-400";
-      default:
-        return "bg-gray-500/20 text-gray-400";
-    }
-  };
-
-  const getStatusText = (status: string) => {
-    switch (status.toLowerCase()) {
-      case "paid":
-        return "Pago";
-      case "pending":
-        return "Pendente";
-      case "unpaid":
-        return "Não Pago";
-      default:
-        return "Desconhecido";
-    }
-  };
-
-  const getInitials = (name: string) => {
-    const nameParts = name.split(" ");
-    const firstInitial = nameParts[0]?.[0]?.toUpperCase() || "";
-    const lastInitial =
-      nameParts[nameParts.length - 1]?.[0]?.toUpperCase() || "";
-    return firstInitial + (nameParts.length > 1 ? lastInitial : "");
-  };
-
   if (alunos.length === 0) {
     return (
       <div className="rounded-[8px] border border-white/10 bg-[#151515] p-8 text-center">
@@ -74,7 +46,8 @@ export default function AlunosTable({ alunos }: AlunosTableProps) {
           <TableHeader className="bg-[#101010] text-white/70">
             <TableRow className="border-white/10 hover:bg-white/5">
               <TableHead className="text-white/70">NOME</TableHead>
-              <TableHead className="text-white/70">EMAIL</TableHead>
+              <TableHead className="text-white/70">CELULAR</TableHead>
+              <TableHead className="text-white/70">PLANO</TableHead>
               <TableHead className="text-white/70">DESDE</TableHead>
               <TableHead className="text-white/70">STATUS</TableHead>
               <TableHead className="text-white/70">GERENCIAR</TableHead>
@@ -94,7 +67,12 @@ export default function AlunosTable({ alunos }: AlunosTableProps) {
                     <span className="text-white">{aluno.name}</span>
                   </div>
                 </TableCell>
-                <TableCell className="text-white/70">{aluno.email}</TableCell>
+                <TableCell className="text-white/70">
+                  {formatPhone(aluno.phone)}
+                </TableCell>
+                <TableCell className="cursor-pointer text-white/70 underline hover:text-white/90">
+                  {aluno.plan.name}
+                </TableCell>
                 <TableCell className="text-white/70">
                   {formatDate(aluno.createdAt)}
                 </TableCell>
@@ -106,7 +84,7 @@ export default function AlunosTable({ alunos }: AlunosTableProps) {
                   </span>
                 </TableCell>
                 <TableCell>
-                  <button className="text-blue-400 transition-colors hover:text-blue-300 hover:underline">
+                  <button className="cursor-pointer text-blue-400 transition-colors hover:text-blue-300 hover:underline">
                     Gerenciar
                   </button>
                 </TableCell>
@@ -131,7 +109,9 @@ export default function AlunosTable({ alunos }: AlunosTableProps) {
                 </div>
                 <div>
                   <h3 className="font-medium text-white">{aluno.name}</h3>
-                  <p className="text-sm text-white/70">{aluno.email}</p>
+                  <p className="text-sm text-white/70">
+                    {formatPhone(aluno.phone)}
+                  </p>
                 </div>
               </div>
               <span
@@ -144,10 +124,13 @@ export default function AlunosTable({ alunos }: AlunosTableProps) {
             {/* Details */}
             <div className="flex items-center justify-between text-sm">
               <div className="text-white/70">
+                <p className="cursor-pointer text-white/70 underline hover:text-white/90">
+                  {aluno.plan.name}
+                </p>
                 <span className="text-white/50">Desde: </span>
                 {formatDate(aluno.createdAt)}
               </div>
-              <button className="font-medium text-blue-400 transition-colors hover:text-blue-300">
+              <button className="cursor-pointer font-medium text-blue-400 transition-colors hover:text-blue-300">
                 Gerenciar
               </button>
             </div>

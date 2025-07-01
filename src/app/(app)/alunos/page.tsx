@@ -8,9 +8,12 @@ import { useEffect, useState } from "react";
 interface Aluno {
   id: string;
   name: string;
-  email: string;
+  phone: string;
   createdAt: string;
   paymentStatus: string;
+  plan: {
+    name: string;
+  };
 }
 
 export default function AlunosPage() {
@@ -41,11 +44,10 @@ export default function AlunosPage() {
     fetchAlunos();
   }, []);
 
-
   if (loading) {
     return (
       <div className="p-8">
-        <div className="flex items-center justify-center h-64">
+        <div className="flex h-64 items-center justify-center">
           <div className="text-white/70">Carregando alunos...</div>
         </div>
       </div>
