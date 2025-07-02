@@ -13,6 +13,7 @@ import {
   getStatusStyle,
   getStatusText,
 } from "@/lib/utils/formatters";
+import { useRouter } from "next/navigation";
 
 interface Aluno {
   id: string;
@@ -30,6 +31,12 @@ interface AlunosTableProps {
 }
 
 export default function AlunosTable({ alunos }: AlunosTableProps) {
+  const router = useRouter();
+
+  const handleNavigateToAluno = (alunoId: string) => {
+    router.push(`/alunos/${alunoId}`);
+  };
+
   if (alunos.length === 0) {
     return (
       <div className="rounded-[8px] border border-white/10 bg-[#151515] p-8 text-center">
@@ -84,7 +91,10 @@ export default function AlunosTable({ alunos }: AlunosTableProps) {
                   </span>
                 </TableCell>
                 <TableCell>
-                  <button className="cursor-pointer text-blue-400 transition-colors hover:text-blue-300 hover:underline">
+                  <button 
+                    className="cursor-pointer text-blue-400 transition-colors hover:text-blue-300 hover:underline" 
+                    onClick={() => handleNavigateToAluno(aluno.id)}
+                  >
                     Gerenciar
                   </button>
                 </TableCell>
@@ -130,7 +140,10 @@ export default function AlunosTable({ alunos }: AlunosTableProps) {
                 <span className="text-white/50">Desde: </span>
                 {formatDate(aluno.createdAt)}
               </div>
-              <button className="cursor-pointer font-medium text-blue-400 transition-colors hover:text-blue-300">
+              <button 
+                className="cursor-pointer font-medium text-blue-400 transition-colors hover:text-blue-300"
+                onClick={() => handleNavigateToAluno(aluno.id)}
+              >
                 Gerenciar
               </button>
             </div>
