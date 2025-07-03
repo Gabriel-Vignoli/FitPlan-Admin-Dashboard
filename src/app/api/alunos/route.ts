@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import bcrypt from "bcryptjs";
 import {
   generateSecurePassword,
   isValidCPF,
@@ -105,16 +104,14 @@ export async function POST(request: NextRequest) {
 
     const password = generateSecurePassword();
 
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    // Create new user
+    // Creating a new user
     await prisma.student.create({
       data: {
         name,
         email,
         phone,
         birthDate: new Date(birthDate),
-        password: hashedPassword,
+        password: password, 
         cpf,
         planId,
       },
