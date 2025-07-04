@@ -4,7 +4,7 @@ import { useRouter, usePathname } from "next/navigation";
 import { AdminData } from "@/lib/auth";
 import Image from "next/image";
 import { Button } from "./ui/button";
-import { BicepsFlexed, Dumbbell, Home, Users, Menu, X } from "lucide-react";
+import { BicepsFlexed, Dumbbell, Home, Users, Menu, X, Diamond } from "lucide-react";
 import { useState, useEffect } from "react";
 
 interface SidebarProps {
@@ -21,6 +21,7 @@ export default function Sidebar({ admin }: SidebarProps) {
     { name: "Alunos", path: "/alunos", icon: <Users></Users> },
     { name: "Treinos", path: "/treinos", icon: <BicepsFlexed></BicepsFlexed> },
     { name: "Exercícios", path: "/exercicios", icon: <Dumbbell></Dumbbell> },
+    { name: 'Planos', path: "/planos", icon: <Diamond></Diamond>}
   ];
 
   const handleLogout = async () => {
