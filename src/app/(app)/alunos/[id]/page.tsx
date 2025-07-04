@@ -1,35 +1,42 @@
 "use client";
 
-import { useParams } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import EditAlunoForm from "@/components/EditAlunoForm";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
-interface Aluno {
+interface Student {
   id: string;
   name: string;
   email: string;
+  password: string;
   phone: string;
   birthDate: string;
-  cpf: string;
+  cpf: string | null;
+  height: number | null;
+  weight: number | null;
+  bodyFat: number | null;
+  isActive: boolean;
   planId: string;
+  paymentStatus: string;
+  createdAt: string;
 }
 
-export default function AlunoDetailPage() {
+export default function EditAlunoPage() {
+  const router = useRouter();
   const params = useParams();
-  const id = params.id as string;
-  
-  const [aluno, setAluno] = useState<Aluno | null>(null);
+  const [student, setStudent] = useState<Student | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
 
   useEffect(() => {
-    const fetchAluno = async () => {
-      if (!id) return;
-      
+    const fetchStudent = async () => {
       try {
-        const response = await fetch(`/api/alunos/${id}`);
+        const response = await fetch(`/api/alunos/${params.id}`);
+        
         if (response.ok) {
-          const alunoData = await response.json();
-          setAluno(alunoData);
+          const studentData = await response.json();
+          setStudent(studentData);
         } else {
           setError("Aluno não encontrado");
         }
@@ -41,28 +48,54 @@ export default function AlunoDetailPage() {
       }
     };
 
-    fetchAluno();
-  }, [id]);
+    if (params.id) {
+      fetchStudent();
+    }
+  }, [params.id]);
+
+  const handleSuccess = () => {
+    router.push("/alunos");
+  };
+
+  const handleCancel = () => {
+    router.back();
+  };
 
   if (isLoading) {
-    return <div className="p-4">Carregando...</div>;
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="text-white text-xl">Carregando dados do aluno...</div>
+      </div>
+    );
   }
 
   if (error) {
-    return <div className="p-4 text-red-500">{error}</div>;
+    return (
+      <div className="flex justify-center mt-8">
+        <Alert variant="destructive" className="max-w-md">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      </div>
+    );
   }
 
-  if (!aluno) {
-    return <div className="p-4">Aluno não encontrado</div>;
+  if (!student) {
+    return (
+      <div className="flex justify-center mt-8">
+        <Alert variant="destructive" className="max-w-md">
+          <AlertDescription>Aluno não encontrado</AlertDescription>
+        </Alert>
+      </div>
+    );
   }
 
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">Detalhes do Aluno</h1>
-      <div className="space-y-2">
-        <p><strong>ID:</strong> {id}</p>
-        <p><strong>Nome:</strong> {aluno.name}</p>
-      </div>
+    <div className="flex justify-center mt-8">
+      <EditAlunoForm 
+        student={student}
+        onSuccess={handleSuccess}
+        onCancel={handleCancel}
+      />
     </div>
   );
 }

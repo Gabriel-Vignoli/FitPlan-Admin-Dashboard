@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import AddAlunoForm from "@/components/AddAlunosForm";
+import AddAlunoForm from "@/components/AddAlunoForm";
 
 export default function AddAlunoPage() {
   const router = useRouter();
