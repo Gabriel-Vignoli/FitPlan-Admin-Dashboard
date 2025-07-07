@@ -1,6 +1,6 @@
 "use client";
 
-import Head from "@/components/Head";
+import Head from "@/components/Header";
 import AlunosTable from "@/components/AlunosTable";
 import { Plus } from "lucide-react";
 import { useEffect, useState } from "react";

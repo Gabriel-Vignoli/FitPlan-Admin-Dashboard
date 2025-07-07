@@ -1,6 +1,7 @@
 "use client";
 
-import Head from "@/components/Head";
+import Head from "@/components/Header";
+import CreatePlanDialog from "@/components/CreatePlanDialog";
 import { Pen, Plus, Trash } from "lucide-react";
 import { useEffect, useState } from "react";
 
@@ -9,6 +10,7 @@ interface Plan {
   name: string;
   price: number;
   description: string;
+  duration: number;
 }
 
 export default function PlansPage() {
@@ -39,6 +41,10 @@ export default function PlansPage() {
     fetchPlans();
   }, []);
 
+  const handlePlanCreated = (newPlan: Plan) => {
+    setPlans(prevPlans => [...prevPlans, newPlan]);
+  };
+
   if (loading) {
     return (
       <div className="p-8">
@@ -66,6 +72,8 @@ export default function PlansPage() {
         description="Escolha o nome, preço e descrição para seu plano"
         buttonText="Adicionar Plano"
         icon={<Plus />}
+        customButton={<CreatePlanDialog onPlanCreated={handlePlanCreated} />}
+        margin={8}
       />
 
       {plans.map((plan) => (
@@ -78,6 +86,9 @@ export default function PlansPage() {
               <div className="flex gap-3 mb-2">
                 <p className="text-lg font-medium text-white">{plan.name}</p>
                 <p className="text-lg font-medium text-green-600">R${plan.price}</p>
+                <p className="text-sm font-medium text-blue-400 bg-blue-500/20 px-2 py-1 rounded">
+                  {plan.duration} dias
+                </p>
               </div>
               <p className="text-base text-white/70">{plan.description}</p>
             </div>

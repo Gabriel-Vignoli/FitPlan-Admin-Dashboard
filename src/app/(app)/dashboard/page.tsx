@@ -1,4 +1,4 @@
-import Head from "@/components/Head";
+import Head from "@/components/Header";
 import StatCard from "@/components/StatCard";
 import { getCurrentAdmin } from "@/lib/auth";
 import { Plus } from "lucide-react";

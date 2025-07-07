@@ -9,6 +9,7 @@ interface HeadProps {
   icon?: React.ReactNode;
   margin?: number;
   pageLink?: string;
+  customButton?: React.ReactNode;
 }
 
 export default function Head({
@@ -18,7 +19,8 @@ export default function Head({
   buttonVariant,
   icon,
   margin = 6,
-  pageLink
+  pageLink,
+  customButton
 }: HeadProps) {
   return (
     <div className={`mb-${margin} md:flex md:items-center md:justify-between space-y-5 gap-5 md:gap-0`}>
@@ -27,7 +29,9 @@ export default function Head({
         <p className="text-white/80 text-sm sm:text-base ">{description}</p>
       </div>
 
-      {pageLink ? (
+      {customButton ? (
+        customButton
+      ) : pageLink ? (
         <Link href={pageLink}>
           <Button variant={buttonVariant} className="text-white">
             {icon}
