@@ -34,3 +34,38 @@ export async function PUT(
     );
   }
 }
+
+export async function DELETE(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  try {
+    const { id } = await params; 
+
+    const existingPlan = await prisma.plan.findUnique({
+      where: { id },
+    });
+
+    if (!existingPlan) {
+      return NextResponse.json(
+        { error: "Plano não encontrado" },
+        { status: 404 },
+      );
+    }
+
+    await prisma.plan.delete({
+      where: { id },
+    });
+
+    return NextResponse.json(
+      { message: "Plano excluído com sucesso" },
+      { status: 200 },
+    );
+  } catch (error) {
+    console.error("Erro ao excluir plano:", error);
+    return NextResponse.json(
+      { error: "Falha ao excluir plano" },
+      { status: 500 },
+    );
+  }
+}

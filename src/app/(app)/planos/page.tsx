@@ -3,8 +3,9 @@
 import Head from "@/components/Header";
 import CreatePlanDialog from "@/components/CreatePlanDialog";
 import EditPlanDialog from "@/components/EditPlanDialog";
-import { Plus, Trash } from "lucide-react";
+import { Plus } from "lucide-react";
 import { useEffect, useState } from "react";
+import DeleteButton from "@/components/DeleteButton";
 
 interface Plan {
   id: string;
@@ -43,14 +44,14 @@ export default function PlansPage() {
   }, []);
 
   const handlePlanCreated = (newPlan: Plan) => {
-    setPlans(prevPlans => [...prevPlans, newPlan]);
+    setPlans((prevPlans) => [...prevPlans, newPlan]);
   };
 
   const handlePlanUpdated = (updatedPlan: Plan) => {
-    setPlans(prevPlans => 
-      prevPlans.map(plan => 
-        plan.id === updatedPlan.id ? updatedPlan : plan
-      )
+    setPlans((prevPlans) =>
+      prevPlans.map((plan) =>
+        plan.id === updatedPlan.id ? updatedPlan : plan,
+      ),
     );
   };
 
@@ -74,6 +75,10 @@ export default function PlansPage() {
     );
   }
 
+  const handlePlanDeleted = (id: string) => {
+    setPlans((prevPlans) => prevPlans.filter((plan) => plan.id !== id));
+  };
+
   return (
     <div className="p-8">
       <Head
@@ -88,14 +93,16 @@ export default function PlansPage() {
       {plans.map((plan) => (
         <div
           key={plan.id}
-          className="w-full border border-white/20 bg-white/5 p-4 mb-4 hover:scale-[1.01] hover:shadow-lg hover:shadow-primary/20 transition-all duration-200 rounded-[8px]"
+          className="hover:shadow-primary/20 mb-4 w-full rounded-[8px] border border-white/20 bg-white/5 p-4 transition-all duration-200 hover:scale-[1.01] hover:shadow-lg"
         >
-          <div className="flex justify-between items-center">
+          <div className="flex items-center justify-between">
             <div>
-              <div className="flex gap-3 mb-2">
+              <div className="mb-2 flex gap-3">
                 <p className="text-lg font-medium text-white">{plan.name}</p>
-                <p className="text-lg font-medium text-green-600">R${plan.price}</p>
-                <p className="text-sm font-medium text-blue-400 bg-blue-500/20 px-2 py-1 rounded">
+                <p className="text-lg font-medium text-green-600">
+                  R${plan.price}
+                </p>
+                <p className="rounded bg-blue-500/20 px-2 py-1 text-sm font-medium text-blue-400">
                   {plan.duration} dias
                 </p>
               </div>
@@ -103,14 +110,16 @@ export default function PlansPage() {
             </div>
             <div className="flex gap-2">
               <EditPlanDialog plan={plan} onPlanUpdated={handlePlanUpdated} />
-              <button className="p-2 rounded-lg bg-white/10 hover:bg-red-500/30 text-white/70 hover:text-red-500 transition-colors">
-                <Trash className="w-4 h-4" />
-              </button>
+              <DeleteButton
+                id={plan.id}
+                endpoint="/api/plans"
+                itemName="plano"
+                onDeleted={handlePlanDeleted}
+              />
             </div>
           </div>
         </div>
       ))}
-
     </div>
   );
 }
