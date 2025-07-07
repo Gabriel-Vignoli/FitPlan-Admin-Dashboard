@@ -169,7 +169,7 @@ export default function EditPlanDialog({ plan, onPlanUpdated }: EditPlanDialogPr
           <div className="flex gap-2 pt-4">
             <Button
               type="button"
-              variant="destructive"
+              variant="outline"
               onClick={() => setOpen(false)}
               className="flex-1 rounded-[8px] transition-all duration-200"
             >
