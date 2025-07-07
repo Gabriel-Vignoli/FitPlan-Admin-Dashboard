@@ -2,7 +2,8 @@
 
 import Head from "@/components/Header";
 import CreatePlanDialog from "@/components/CreatePlanDialog";
-import { Pen, Plus, Trash } from "lucide-react";
+import EditPlanDialog from "@/components/EditPlanDialog";
+import { Plus, Trash } from "lucide-react";
 import { useEffect, useState } from "react";
 
 interface Plan {
@@ -43,6 +44,14 @@ export default function PlansPage() {
 
   const handlePlanCreated = (newPlan: Plan) => {
     setPlans(prevPlans => [...prevPlans, newPlan]);
+  };
+
+  const handlePlanUpdated = (updatedPlan: Plan) => {
+    setPlans(prevPlans => 
+      prevPlans.map(plan => 
+        plan.id === updatedPlan.id ? updatedPlan : plan
+      )
+    );
   };
 
   if (loading) {
@@ -93,9 +102,7 @@ export default function PlansPage() {
               <p className="text-base text-white/70">{plan.description}</p>
             </div>
             <div className="flex gap-2">
-              <button className="p-2 rounded-lg bg-white/10 hover:bg-blue-500/30 text-white/70 hover:text-blue-500 transition-colors">
-                <Pen className="w-4 h-4" />
-              </button>
+              <EditPlanDialog plan={plan} onPlanUpdated={handlePlanUpdated} />
               <button className="p-2 rounded-lg bg-white/10 hover:bg-red-500/30 text-white/70 hover:text-red-500 transition-colors">
                 <Trash className="w-4 h-4" />
               </button>

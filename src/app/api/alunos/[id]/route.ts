@@ -3,8 +3,9 @@ import { NextResponse } from "next/server";
 
 export async function GET(request: Request, { params }: { params: { id: string } }) {
   try {
+    const { id } = await params;
     const aluno = await prisma.student.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         plan: true,
       }
@@ -30,9 +31,10 @@ export async function GET(request: Request, { params }: { params: { id: string }
 export async function PUT(request: Request, { params }: { params: { id: string } }) {
   try {
     const body = await request.json();
+    const { id } = await params;
     
     const existingStudent = await prisma.student.findUnique({
-      where: { id: params.id }
+      where: { id }
     });
 
     if (!existingStudent) {
@@ -43,7 +45,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     }
 
     const updatedAluno = await prisma.student.update({
-      where: { id: params.id },
+      where: { id },
       data: body,
       include: {
         plan: true,

@@ -1,0 +1,36 @@
+import { prisma } from "@/lib/prisma";
+import { NextResponse } from "next/server";
+
+export async function PUT(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  try {
+    const body = await request.json();
+    const { id } = await params;
+
+    const existingPlan = await prisma.plan.findUnique({
+      where: { id },
+    });
+
+    if (!existingPlan) {
+      return NextResponse.json(
+        { error: "Plano não encontrado" },
+        { status: 404 },
+      );
+    }
+
+    const updatedPlan = await prisma.plan.update({
+      where: { id },
+      data: body,
+    });
+
+    return NextResponse.json(updatedPlan);
+  } catch (error) {
+    console.log("Error updating plan:", error);
+    return NextResponse.json(
+      { error: "Falha ao atualizar plano" },
+      { status: 500 },
+    );
+  }
+}
