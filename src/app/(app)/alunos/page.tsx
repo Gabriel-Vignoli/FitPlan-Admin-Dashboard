@@ -2,8 +2,10 @@
 
 import Head from "@/components/Header";
 import AlunosTable from "@/components/AlunosTable";
+
 import { Plus } from "lucide-react";
 import { useEffect, useState } from "react";
+import AddAlunoDialog from "@/components/AddAlunoDialog";
 
 interface Aluno {
   id: string;
@@ -44,6 +46,27 @@ export default function AlunosPage() {
     fetchAlunos();
   }, []);
 
+  const handleAlunoCreated = () => {
+    fetchAlunos();
+  };
+
+  const fetchAlunos = async () => {
+    try {
+      const response = await fetch("/api/alunos");
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch alunos");
+      }
+
+      const data = await response.json();
+      setAlunos(data);
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error ? err.message : "An unknown error occurred";
+      setError(errorMessage);
+    }
+  };
+
   if (loading) {
     return (
       <div className="p-8">
@@ -72,8 +95,8 @@ export default function AlunosPage() {
           title="Gerenciar Alunos"
           description="Adicione, exclua, edite alunos e também adicione seus treinos"
           icon={<Plus />}
+          customButton={<AddAlunoDialog onAlunoCreated={handleAlunoCreated} />}
           margin={5}
-          pageLink="/alunos/add"
         />
         <div className="mt-5 min-w-full rounded-[8px] border border-white/30 bg-[#151515] px-4 py-2 text-white/30">
           Procurar Aluno
