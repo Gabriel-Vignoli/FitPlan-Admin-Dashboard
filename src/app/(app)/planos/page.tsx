@@ -1,6 +1,6 @@
 "use client";
 
-import Head from "@/components/Header";
+import Header from "@/components/Header";
 import CreatePlanDialog from "@/components/CreatePlanDialog";
 import EditPlanDialog from "@/components/EditPlanDialog";
 import { Plus } from "lucide-react";
@@ -81,7 +81,7 @@ export default function PlansPage() {
 
   return (
     <div className="p-8">
-      <Head
+      <Header
         title="Gerencie seus planos"
         description="Escolha o nome, preço e descrição para seu plano"
         buttonText="Adicionar Plano"

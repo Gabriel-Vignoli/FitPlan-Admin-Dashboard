@@ -1,6 +1,6 @@
 "use client";
 
-import Head from "@/components/Header";
+import Header from "@/components/Header";
 import AlunosTable from "@/components/AlunosTable";
 
 import { Plus } from "lucide-react";
@@ -90,7 +90,7 @@ export default function AlunosPage() {
   return (
     <div className="p-8">
       <div className="mb-10">
-        <Head
+        <Header
           buttonText="Adicionar Aluno"
           title="Gerenciar Alunos"
           description="Adicione, exclua, edite alunos e também adicione seus treinos"

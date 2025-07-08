@@ -12,7 +12,7 @@ interface HeadProps {
   customButton?: React.ReactNode;
 }
 
-export default function Head({
+export default function Header({
   title,
   description,
   buttonText,

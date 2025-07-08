@@ -1,4 +1,4 @@
-import Head from "@/components/Header";
+import Header from "@/components/Header";
 import StatCard from "@/components/StatCard";
 import { getCurrentAdmin } from "@/lib/auth";
 import { Plus } from "lucide-react";
@@ -40,14 +40,14 @@ export default async function DashboardPage() {
 
   return (
       <div className="p-8">
-        <Head
+        <Header
           buttonText="Adicionar Aluno"
           buttonVariant="default"
           title={`Bem-vindo ${admin.name}`}
           description="Descubra padrões, otimize treinos e acompanhe o fluxo da academia!"
           icon={<Plus></Plus>}
           pageLink="/alunos/add"
-        ></Head>
+        ></Header>
 
         {/* Estatísticas */}
         <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
