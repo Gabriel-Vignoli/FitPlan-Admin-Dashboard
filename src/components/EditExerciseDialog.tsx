@@ -1,7 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
-import Image from "next/image";
+import { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -10,10 +9,11 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Edit, ImageIcon, Upload, Video, X } from "lucide-react";
 import { Button } from "./ui/button";
-import { Plus, Upload, X, Image as ImageIcon, Video } from "lucide-react";
-import { Label } from "./ui/label";
-import { Input } from "./ui/input";
+import Image from "next/image";
 
 interface Exercise {
   id: string;
@@ -22,14 +22,16 @@ interface Exercise {
   imageUrl: string;
   videoUrl: string;
 }
-  
-interface CreateExerciseDialogProps {
-  onExerciseCreated: (exercise: Exercise) => void;
+
+interface EditExerciseDialogProps {
+  exercise: Exercise;
+  onExerciseUpdated: (exercise: Exercise) => void;
 }
 
-export default function CreateExerciseDialog({
-  onExerciseCreated,
-}: CreateExerciseDialogProps) {
+export default function EditExerciseDialog({
+  exercise,
+  onExerciseUpdated,
+}: EditExerciseDialogProps) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -40,6 +42,21 @@ export default function CreateExerciseDialog({
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [videoFile, setVideoFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [removeOriginalImage, setRemoveOriginalImage] = useState(false);
+
+  useEffect(() => {
+    if (open && exercise) {
+      setFormData({
+        name: exercise.name,
+        targetMuscle: exercise.targetMuscle,
+      });
+      setImagePreview(exercise.imageUrl || null);
+      setImageFile(null);
+      setVideoFile(null);
+      setRemoveOriginalImage(false);
+      setError(null);
+    }
+  }, [open, exercise]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -59,38 +76,34 @@ export default function CreateExerciseDialog({
         formDataToSend.append("video", videoFile);
       }
 
-      const response = await fetch("/api/exercises", {
-        method: "POST",
+      if (removeOriginalImage) {
+        formDataToSend.append("removeImage", "true");
+      }
+
+      const response = await fetch(`/api/exercises/${exercise.id}`, {
+        method: "PUT",
         body: formDataToSend,
       });
 
       if (!response.ok) {
-        throw new Error("Failed to create exercise");
+        throw new Error("Failed to update exercise");
       }
 
-      const newExercise = await response.json();
+      const updatedExercise = await response.json();
 
-      if (newExercise && newExercise.id) {
-        onExerciseCreated(newExercise);
-        resetForm();
-        setOpen(false);
+      if (updatedExercise && updatedExercise.id) {
+        onExerciseUpdated(updatedExercise);
       } else {
         throw new Error("Invalid exercise data received");
       }
+
+      setOpen(false);
     } catch (error) {
-      console.error("Error creating exercise:", error);
-      setError("Erro ao criar exercício. Tente novamente.");
+      console.error("Error updating exercise:", error);
+      setError("Erro ao atualizar exercício. Tente novamente.");
     } finally {
       setLoading(false);
     }
-  };
-
-  const resetForm = () => {
-    setFormData({ name: "", targetMuscle: "" });
-    setImageFile(null);
-    setVideoFile(null);
-    setImagePreview(null);
-    setError(null);
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -113,7 +126,7 @@ export default function CreateExerciseDialog({
     }
   };
 
-  const handleVideoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleVideoChange = (e: React.ChangeEvent<HTMLInputInput>) => {
     const file = e.target.files?.[0];
     if (file) {
       setVideoFile(file);
@@ -122,7 +135,14 @@ export default function CreateExerciseDialog({
 
   const removeImage = () => {
     setImageFile(null);
-    setImagePreview(null);
+    // If there's a new image file, reset to original image
+    // If we're showing the original image, remove it completely
+    if (imageFile) {
+      setImagePreview(exercise.imageUrl || null);
+    } else {
+      setImagePreview(null);
+      setRemoveOriginalImage(true);
+    }
   };
 
   const removeVideo = () => {
@@ -132,18 +152,18 @@ export default function CreateExerciseDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="text-white">
-          <Plus className="mr-2 h-4 w-4" />
-          Adicionar Exercício
+        <Button variant="outline" size="sm" className="flex-1 rounded-[8px]">
+          <Edit className="mr-2 h-4 w-4" />
+          Editar
         </Button>
       </DialogTrigger>
       <DialogContent className="rounded-[8px] bg-gradient-to-br from-black to-[#101010] sm:max-w-[500px]">
         <DialogHeader className="space-y-3">
           <DialogTitle className="text-xl font-semibold text-white">
-            Criar Novo Exercício
+            Editar {exercise.name}
           </DialogTitle>
           <DialogDescription className="text-gray-400">
-            Preencha os dados do novo exercício e adicione arquivos de mídia.
+            Preencha os dados do exercício e adicione arquivos de mídia.
           </DialogDescription>
         </DialogHeader>
 
@@ -201,7 +221,7 @@ export default function CreateExerciseDialog({
                 Imagem do Exercício
               </Label>
 
-              {imagePreview ? (
+              {imagePreview && !removeOriginalImage ? (
                 <div className="relative">
                   <Image
                     src={imagePreview}
@@ -246,6 +266,11 @@ export default function CreateExerciseDialog({
               <Label className="flex items-center text-sm font-medium text-white">
                 <Video className="mr-2 h-4 w-4" />
                 Vídeo do Exercício
+                {exercise.videoUrl && (
+                  <span className="ml-2 text-xs text-green-400">
+                    (Vídeo atual disponível)
+                  </span>
+                )}
               </Label>
 
               {videoFile ? (
@@ -287,6 +312,7 @@ export default function CreateExerciseDialog({
                     <Upload className="mb-2 h-8 w-8 text-gray-400" />
                     <p className="text-sm text-gray-400">
                       Clique para selecionar um vídeo
+                      {exercise.videoUrl && " (substituirá o atual)"}
                     </p>
                   </Label>
                 </div>
@@ -299,7 +325,6 @@ export default function CreateExerciseDialog({
               type="button"
               variant="outline"
               onClick={() => {
-                resetForm();
                 setOpen(false);
               }}
               className="flex-1 rounded-[8px] transition-all duration-200"

@@ -1,9 +1,10 @@
 "use client";
 
 import CreateExerciseDialog from "@/components/CreateExerciseDialog";
+import EditExerciseDialog from "@/components/EditExerciseDialog";
 import Header from "@/components/Header";
 import { Button } from "@/components/ui/button";
-import { Plus, Dumbbell, Edit, Trash2 } from "lucide-react";
+import { Plus, Dumbbell, Trash2 } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 
@@ -46,6 +47,14 @@ export default function ExercisesPage() {
 
   const handleExerciseCreated = (newExercise: Exercise) => {
     setExercises((prevExercises) => [...prevExercises, newExercise]);
+  };
+
+   const handleExerciseUpdated = (updatedExercise: Exercise) => {
+    setExercises((prevExercises) =>
+      prevExercises.map((exercise) =>
+        exercise.id === updatedExercise.id ? updatedExercise : exercise,
+      ),
+    );
   };
 
   if (loading) {
@@ -124,10 +133,7 @@ export default function ExercisesPage() {
                 </div>
 
                 <div className="flex gap-2 pt-2">
-                  <Button variant="outline" size="sm" className="flex-1 rounded-[8px]">
-                    <Edit className="mr-2 h-4 w-4" />
-                    Editar
-                  </Button>
+                  <EditExerciseDialog exercise={exercise} onExerciseUpdated={handleExerciseUpdated}></EditExerciseDialog>
 
                   <Button
                     variant="outline"
