@@ -12,7 +12,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Pen } from "lucide-react";
+import { Edit } from "lucide-react";
 import { Button } from "./ui/button";
 
 interface Plan {
@@ -87,8 +87,8 @@ export default function EditPlanDialog({ plan, onPlanUpdated }: EditPlanDialogPr
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <button className="p-2 rounded-lg bg-white/10 hover:bg-blue-500/30 text-white/70 hover:text-blue-500 transition-colors">
-          <Pen className="w-4 h-4" />
+        <button className="p-2 bg-white/10 hover:bg-blue-500/30 text-white/70 hover:text-blue-500 transition-colors rounded-[4px]">
+          <Edit className="w-4 h-4" />
         </button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px] bg-gradient-to-br from-black to-[#101010] rounded-[8px]">

@@ -52,7 +52,7 @@ export default function DeleteButton({ id, endpoint, itemName, onDeleted }: Dele
     <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
       <AlertDialogTrigger asChild>
         <button
-          className="p-2 rounded-lg bg-white/10 hover:bg-red-500/30 text-white/70 hover:text-red-500 transition-colors"
+          className="p-2 rounded-[4px] bg-white/10 hover:bg-red-500/30 text-white/70 hover:text-red-500 transition-colors"
           disabled={isDeleting}
         >
           {isDeleting ? (

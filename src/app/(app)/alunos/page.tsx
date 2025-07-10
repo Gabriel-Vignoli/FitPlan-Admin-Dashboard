@@ -5,7 +5,7 @@ import AlunosTable from "@/components/AlunosTable";
 
 import { Plus } from "lucide-react";
 import { useEffect, useState } from "react";
-import AddAlunoDialog from "@/components/AddAlunoDialog";
+import AddAlunoDialog from "@/components/CreateAlunoDialog";
 
 interface Aluno {
   id: string;
