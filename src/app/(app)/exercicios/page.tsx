@@ -1,10 +1,10 @@
 "use client";
 
 import CreateExerciseDialog from "@/components/CreateExerciseDialog";
+import DeleteButton from "@/components/DeleteButton";
 import EditExerciseDialog from "@/components/EditExerciseDialog";
 import Header from "@/components/Header";
-import { Button } from "@/components/ui/button";
-import { Plus, Dumbbell, Trash2 } from "lucide-react";
+import { Plus, Dumbbell } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 
@@ -49,7 +49,7 @@ export default function ExercisesPage() {
     setExercises((prevExercises) => [...prevExercises, newExercise]);
   };
 
-   const handleExerciseUpdated = (updatedExercise: Exercise) => {
+  const handleExerciseUpdated = (updatedExercise: Exercise) => {
     setExercises((prevExercises) =>
       prevExercises.map((exercise) =>
         exercise.id === updatedExercise.id ? updatedExercise : exercise,
@@ -77,6 +77,12 @@ export default function ExercisesPage() {
       </div>
     );
   }
+
+  const handleExerciseDeleted = (id: string) => {
+    setExercises((prevExercises) =>
+      prevExercises.filter((exercise) => exercise.id !== id),
+    );
+  };
 
   return (
     <div className="p-8">
@@ -133,16 +139,18 @@ export default function ExercisesPage() {
                 </div>
 
                 <div className="flex gap-2 pt-2">
-                  <EditExerciseDialog exercise={exercise} onExerciseUpdated={handleExerciseUpdated}></EditExerciseDialog>
+                  <EditExerciseDialog
+                    exercise={exercise}
+                    onExerciseUpdated={handleExerciseUpdated}
+                  ></EditExerciseDialog>
 
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="flex-1 border-red-500/30 text-red-400 hover:border-red-500/50 hover:bg-red-500/10 rounded-[8px]"
-                  >
-                    <Trash2 className="mr-2 h-4 w-4" />
-                    Excluir
-                  </Button>
+                  <DeleteButton
+                    id={exercise.id}
+                    endpoint="/api/exercises"
+                    itemName="exercicio"
+                    onDeleted={handleExerciseDeleted}
+                    variant="button"
+                  />
                 </div>
               </div>
             </div>

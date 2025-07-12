@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Trash2, Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -19,9 +20,10 @@ interface DeleteButtonProps {
   endpoint: string;
   itemName: string;
   onDeleted: (id: string) => void;
+  variant?: "default" | "button";
 }
 
-export default function DeleteButton({ id, endpoint, itemName, onDeleted }: DeleteButtonProps) {
+export default function DeleteButton({ id, endpoint, itemName, onDeleted, variant = "default" }: DeleteButtonProps) {
   const [isDeleting, setIsDeleting] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
 
@@ -51,16 +53,32 @@ export default function DeleteButton({ id, endpoint, itemName, onDeleted }: Dele
   return (
     <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
       <AlertDialogTrigger asChild>
-        <button
-          className="p-2 rounded-[4px] bg-white/10 hover:bg-red-500/30 text-white/70 hover:text-red-500 transition-colors"
-          disabled={isDeleting}
-        >
-          {isDeleting ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : (
-            <Trash2 className="h-4 w-4" />
-          )}
-        </button>
+        {variant === "button" ? (
+          <Button
+            variant="outline"
+            size="sm"
+            className="flex-1 rounded-[8px] border-red-500/30 text-red-400 hover:border-red-500/50 hover:bg-red-500/10"
+            disabled={isDeleting}
+          >
+            {isDeleting ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <Trash2 className="mr-2 h-4 w-4" />
+            )}
+            Excluir
+          </Button>
+        ) : (
+          <button
+            className="p-2 rounded-[4px] bg-white/10 hover:bg-red-500/30 text-white/70 hover:text-red-500 transition-colors"
+            disabled={isDeleting}
+          >
+            {isDeleting ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Trash2 className="h-4 w-4" />
+            )}
+          </button>
+        )}
       </AlertDialogTrigger>
       
       <AlertDialogContent className="bg-[#080808] border-white/30 text-white rounded-[8px]">
