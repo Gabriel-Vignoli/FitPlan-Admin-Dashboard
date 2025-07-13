@@ -1,6 +1,33 @@
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 
+export async function GET(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  try {
+    const { id } = await params;
+    const plan = await prisma.plan.findUnique({
+      where: { id },
+    });
+
+    if (!plan) {
+      return NextResponse.json(
+        { error: "Plano não encontrado" },
+        { status: 404 },
+      );
+    }
+
+    return NextResponse.json(plan);
+  } catch (error) {
+    console.log("Error fetching plan:", error);
+    return NextResponse.json(
+      { error: "Falha ao buscar plano" },
+      { status: 500 },
+    );
+  }
+}
+
 export async function PUT(
   request: Request,
   { params }: { params: Promise<{ id: string }> },
@@ -40,7 +67,7 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
-    const { id } = await params; 
+    const { id } = await params;
 
     const existingPlan = await prisma.plan.findUnique({
       where: { id },
