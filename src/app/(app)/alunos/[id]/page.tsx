@@ -5,9 +5,9 @@ import { useEffect, useState } from "react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import StudentInfoComponent from "@/components/AlunoInfoComponent";
 import { Button } from "@/components/ui/button";
-import { User } from "lucide-react";
 import DeleteButton from "@/components/DeleteButton";
 import Header from "@/components/Header";
+import EditAlunoDialog from "@/components/EditAlunoDialog";
 
 interface Student {
   id: string;
@@ -91,8 +91,28 @@ export default function EditAlunoPage() {
   const handleStudentDeleted = () => {
     setTimeout(() => {
       router.back();
-      alert("Plano deletado com sucesso");
+      alert("Aluno deletado com sucesso");
     }, 3000);
+  };
+
+  const handleStudentUpdated = async (updatedStudent: Student) => {
+    setStudent(updatedStudent);
+    
+    if (updatedStudent.planId !== student?.planId) {
+      try {
+        const planResponse = await fetch(`/api/plans/${updatedStudent.planId}`);
+        if (planResponse.ok) {
+          const planData = await planResponse.json();
+          setPlan(planData);
+        } else {
+          console.warn("Plano não encontrado para ID:", updatedStudent.planId);
+          setPlan(null);
+        }
+      } catch (planError) {
+        console.error("Erro ao carregar plano:", planError);
+        setPlan(null);
+      }
+    }
   };
 
   if (isLoading) {
@@ -141,13 +161,7 @@ export default function EditAlunoPage() {
         <StudentInfoComponent student={student} plan={plan} />
         {/* Additional Actions */}
         <div className="mt-8 flex flex-wrap justify-center gap-3 md:justify-start">
-          <Button
-            variant="secondary"
-            className="flex items-center gap-2 px-6 py-2"
-          >
-            <User className="h-4 w-4" />
-            Editar Aluno
-          </Button>
+          <EditAlunoDialog student={student} onStudentUpdated={handleStudentUpdated}></EditAlunoDialog>
           <DeleteButton
             endpoint="/api/alunos"
             itemName="Aluno"
