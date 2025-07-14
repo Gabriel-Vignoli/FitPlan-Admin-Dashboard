@@ -5,6 +5,9 @@ import { useEffect, useState } from "react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import StudentInfoComponent from "@/components/AlunoInfoComponent";
 import { Button } from "@/components/ui/button";
+import { User } from "lucide-react";
+import DeleteButton from "@/components/DeleteButton";
+import Header from "@/components/Header";
 
 interface Student {
   id: string;
@@ -27,6 +30,8 @@ interface Plan {
   id: string;
   name: string;
   price: number;
+  duration: number;
+  description: string;
 }
 
 export default function EditAlunoPage() {
@@ -41,7 +46,7 @@ export default function EditAlunoPage() {
     const fetchStudentAndPlan = async () => {
       try {
         const studentResponse = await fetch(`/api/alunos/${params.id}`);
-        
+
         if (!studentResponse.ok) {
           setError("Aluno não encontrado");
           return;
@@ -52,8 +57,10 @@ export default function EditAlunoPage() {
 
         if (studentData.planId) {
           try {
-            const planResponse = await fetch(`/api/plans/${studentData.planId}`);
-            
+            const planResponse = await fetch(
+              `/api/plans/${studentData.planId}`,
+            );
+
             if (planResponse.ok) {
               const planData = await planResponse.json();
               setPlan(planData);
@@ -77,25 +84,28 @@ export default function EditAlunoPage() {
     }
   }, [params.id]);
 
-  const handleSuccess = () => {
-    router.push("/alunos");
-  };
-
   const handleCancel = () => {
     router.back();
   };
 
+  const handleStudentDeleted = () => {
+    setTimeout(() => {
+      router.back();
+      alert("Plano deletado com sucesso");
+    }, 3000);
+  };
+
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center min-h-screen">
-        <div className="text-white text-xl">Carregando dados do aluno...</div>
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="text-xl text-white">Carregando dados do aluno...</div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="flex justify-center mt-8">
+      <div className="mt-8 flex justify-center">
         <Alert variant="destructive" className="max-w-md">
           <AlertDescription>{error}</AlertDescription>
         </Alert>
@@ -105,7 +115,7 @@ export default function EditAlunoPage() {
 
   if (!student) {
     return (
-      <div className="flex justify-center mt-8">
+      <div className="mt-8 flex justify-center">
         <Alert variant="destructive" className="max-w-md">
           <AlertDescription>Aluno não encontrado</AlertDescription>
         </Alert>
@@ -114,36 +124,37 @@ export default function EditAlunoPage() {
   }
 
   return (
-    <div className="min-h-screen py-8">
-      <div className="max-w-7xl mx-auto px-4">
-        {/* Header */}
-        <div className="mb-6">
-          <Button
-            onClick={handleCancel}
-            variant="destructive"
-          >
+    <div className="p-8">
+      <Header
+        buttonText="Voltar"
+        description="Veja todos os dados de seu aluno"
+        title="Dados do Aluno"
+        customButton={
+          <Button onClick={handleCancel} variant="destructive">
             Voltar
           </Button>
-          <h1 className="text-3xl font-bold">Informações do Aluno</h1>
-        </div>
+        }
+      ></Header>
 
+      <div className="flex items-center flex-col">
         {/* Student Info Component */}
         <StudentInfoComponent student={student} plan={plan} />
-
         {/* Additional Actions */}
-        <div className="mt-8 flex justify-center gap-4">
-          <button
-            onClick={() => router.push(`/alunos/${student.id}/edit`)}
-            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            Editar Aluno
-          </button>
+        <div className="mt-8 flex flex-wrap justify-center gap-3 md:justify-start">
           <Button
-            onClick={handleCancel}
-            variant="destructive"
+            variant="secondary"
+            className="flex items-center gap-2 px-6 py-2"
           >
-            Voltar à Lista
+            <User className="h-4 w-4" />
+            Editar Aluno
           </Button>
+          <DeleteButton
+            endpoint="/api/alunos"
+            itemName="Aluno"
+            id={student.id}
+            variant="button"
+            onDeleted={handleStudentDeleted}
+          ></DeleteButton>
         </div>
       </div>
     </div>

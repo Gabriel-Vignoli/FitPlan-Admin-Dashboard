@@ -296,7 +296,8 @@ export default function AddAlunoDialog({ onAlunoCreated }: AddAlunoDialogProps) 
             <Button
               type="submit"
               disabled={isLoading || isLoadingPlans}
-              className="flex-1 bg-blue-600 hover:bg-blue-900 disabled:bg-blue-900 rounded-[8px] transition-all duration-200 text-white"
+              variant="secondary"
+              className="flex-1"
             >
               {isLoading ? "Criando..." : "Criar Aluno"}
             </Button>

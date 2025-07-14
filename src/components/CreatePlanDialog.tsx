@@ -179,7 +179,8 @@ export default function CreatePlanDialog({ onPlanCreated }: CreatePlanDialogProp
             <Button
               type="submit"
               disabled={loading}
-              className="flex-1 bg-blue-600 hover:bg-blue-900 disabled:bg-blue-900 rounded-[8px] transition-all duration-200 text-white"
+              variant="secondary"
+              className="flex-1"
             >
               {loading ? "Salvando..." : "Salvar Plano"}
             </Button>

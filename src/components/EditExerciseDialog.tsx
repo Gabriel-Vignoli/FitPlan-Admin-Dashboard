@@ -334,7 +334,8 @@ export default function EditExerciseDialog({
             <Button
               type="submit"
               disabled={loading || !formData.name || !formData.targetMuscle}
-              className="flex-1 rounded-[8px] bg-blue-600 text-white transition-all duration-200 hover:bg-blue-900 disabled:bg-blue-900"
+              variant="secondary"
+              className="flex-1"
             >
               {loading ? (
                 <div className="flex items-center">

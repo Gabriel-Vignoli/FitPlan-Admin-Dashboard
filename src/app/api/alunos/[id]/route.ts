@@ -62,3 +62,38 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
     );
   }
 }
+
+export async function DELETE(
+  request: Request,
+  { params }: { params: Promise<{ id: string }>},
+) {
+  try {
+    const { id } = await params
+
+    const existingStudent = await prisma.student.findUnique({
+      where: { id }
+    })
+
+    if (!existingStudent) {
+      return NextResponse.json(
+        { error: "Aluno não encontrado" },
+        { status: 404 },
+      );
+    }
+
+    await prisma.student.delete({
+      where: { id }
+    })
+
+   return NextResponse.json(
+      { message: "Aluno excluído com sucesso" },
+      { status: 200 },
+    );
+  } catch (error) {
+    console.error("Erro ao excluir aluno:", error);
+    return NextResponse.json(
+      { error: "Falha ao excluir aluno" },
+      { status: 500 },
+    );
+  }
+}
