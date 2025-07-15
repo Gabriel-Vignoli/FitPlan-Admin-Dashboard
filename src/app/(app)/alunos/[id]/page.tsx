@@ -2,12 +2,12 @@
 
 import { useRouter, useParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import StudentInfoComponent from "@/components/AlunoInfoComponent";
 import { Button } from "@/components/ui/button";
 import DeleteButton from "@/components/DeleteButton";
 import Header from "@/components/Header";
 import EditAlunoDialog from "@/components/EditAlunoDialog";
+import Loader from "@/components/Loader";
 
 interface Student {
   id: string;
@@ -115,34 +115,6 @@ export default function EditAlunoPage() {
     }
   };
 
-  if (isLoading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="text-xl text-white">Carregando dados do aluno...</div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="mt-8 flex justify-center">
-        <Alert variant="destructive" className="max-w-md">
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
-      </div>
-    );
-  }
-
-  if (!student) {
-    return (
-      <div className="mt-8 flex justify-center">
-        <Alert variant="destructive" className="max-w-md">
-          <AlertDescription>Aluno não encontrado</AlertDescription>
-        </Alert>
-      </div>
-    );
-  }
-
   return (
     <div className="p-8">
       <Header
@@ -154,23 +126,35 @@ export default function EditAlunoPage() {
             Voltar
           </Button>
         }
-      ></Header>
+      />
 
-      <div className="flex items-center flex-col">
-        {/* Student Info Component */}
-        <StudentInfoComponent student={student} plan={plan} />
-        {/* Additional Actions */}
-        <div className="mt-8 flex flex-wrap justify-center gap-3 md:justify-start">
-          <EditAlunoDialog student={student} onStudentUpdated={handleStudentUpdated}></EditAlunoDialog>
-          <DeleteButton
-            endpoint="/api/alunos"
-            itemName="Aluno"
-            id={student.id}
-            variant="button"
-            onDeleted={handleStudentDeleted}
-          ></DeleteButton>
+      {isLoading ? (
+        <Loader text="Carregando dados do aluno..." size="lg" />
+      ) : error ? (
+        <div className="rounded-[8px] border border-red-500/30 bg-red-500/10 p-4">
+          <p className="text-red-400">Erro ao carregar dados: {error}</p>
         </div>
-      </div>
+      ) : !student ? (
+        <div className="rounded-[8px] border border-red-500/30 bg-red-500/10 p-4">
+          <p className="text-red-400">Aluno não encontrado</p>
+        </div>
+      ) : (
+        <div className="flex items-center flex-col">
+          {/* Student Info Component */}
+          <StudentInfoComponent student={student} plan={plan} />
+          {/* Additional Actions */}
+          <div className="mt-8 flex flex-wrap justify-center gap-3 md:justify-start">
+            <EditAlunoDialog student={student} onStudentUpdated={handleStudentUpdated} />
+            <DeleteButton
+              endpoint="/api/alunos"
+              itemName="Aluno"
+              id={student.id}
+              variant="button"
+              onDeleted={handleStudentDeleted}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

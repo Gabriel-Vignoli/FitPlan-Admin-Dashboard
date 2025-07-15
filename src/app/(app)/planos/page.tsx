@@ -6,6 +6,7 @@ import EditPlanDialog from "@/components/EditPlanDialog";
 import { Plus } from "lucide-react";
 import { useEffect, useState } from "react";
 import DeleteButton from "@/components/DeleteButton";
+import Loader from "@/components/Loader";
 
 interface Plan {
   id: string;
@@ -55,26 +56,6 @@ export default function PlansPage() {
     );
   };
 
-  if (loading) {
-    return (
-      <div className="p-8">
-        <div className="flex h-64 items-center justify-center">
-          <div className="text-white/70">Carregando planos...</div>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="p-8">
-        <div className="rounded-[8px] border border-red-500/30 bg-red-500/10 p-4">
-          <p className="text-red-400">Erro ao carregar planos: {error}</p>
-        </div>
-      </div>
-    );
-  }
-
   const handlePlanDeleted = (id: string) => {
     setPlans((prevPlans) => prevPlans.filter((plan) => plan.id !== id));
   };
@@ -90,36 +71,44 @@ export default function PlansPage() {
         margin={8}
       />
 
-      {plans.map((plan) => (
-        <div
-          key={plan.id}
-          className="hover:shadow-primary/20 mb-4 w-full rounded-[8px] border border-white/20 bg-white/5 p-4 transition-all duration-200 hover:scale-[1.01] hover:shadow-lg"
-        >
-          <div className="flex items-center justify-between">
-            <div>
-              <div className="mb-2 flex gap-3">
-                <p className="text-lg font-medium text-white">{plan.name}</p>
-                <p className="text-lg font-medium text-green-600">
-                  R${plan.price}
-                </p>
-                <p className="rounded bg-blue-500/20 px-2 py-1 text-sm font-medium text-blue-400">
-                  {plan.duration} dias
-                </p>
+      {loading ? (
+        <Loader text="Carregando planos..." size="lg" />
+      ) : error ? (
+        <div className="rounded-[8px] border border-red-500/30 bg-red-500/10 p-4">
+          <p className="text-red-400">Erro ao carregar planos: {error}</p>
+        </div>
+      ) : (
+        plans.map((plan) => (
+          <div
+            key={plan.id}
+            className="hover:shadow-primary/20 mb-4 w-full rounded-[8px] border border-white/20 bg-white/5 p-4 transition-all duration-200 hover:scale-[1.01] hover:shadow-lg"
+          >
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="mb-2 flex gap-3">
+                  <p className="text-lg font-medium text-white">{plan.name}</p>
+                  <p className="text-lg font-medium text-green-600">
+                    R${plan.price}
+                  </p>
+                  <p className="rounded bg-blue-500/20 px-2 py-1 text-sm font-medium text-blue-400">
+                    {plan.duration} dias
+                  </p>
+                </div>
+                <p className="text-base text-white/70">{plan.description}</p>
               </div>
-              <p className="text-base text-white/70">{plan.description}</p>
-            </div>
-            <div className="flex gap-2">
-              <EditPlanDialog plan={plan} onPlanUpdated={handlePlanUpdated} />
-              <DeleteButton
-                id={plan.id}
-                endpoint="/api/plans"
-                itemName="plano"
-                onDeleted={handlePlanDeleted}
-              />
+              <div className="flex gap-2">
+                <EditPlanDialog plan={plan} onPlanUpdated={handlePlanUpdated} />
+                <DeleteButton
+                  id={plan.id}
+                  endpoint="/api/plans"
+                  itemName="plano"
+                  onDeleted={handlePlanDeleted}
+                />
+              </div>
             </div>
           </div>
-        </div>
-      ))}
+        ))
+      )}
     </div>
   );
 }

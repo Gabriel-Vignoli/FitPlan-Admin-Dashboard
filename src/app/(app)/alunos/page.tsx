@@ -6,6 +6,7 @@ import AlunosTable from "@/components/AlunosTable";
 import { Plus } from "lucide-react";
 import { useEffect, useState } from "react";
 import AddAlunoDialog from "@/components/CreateAlunoDialog";
+import Loader from "@/components/Loader";
 
 interface Aluno {
   id: string;
@@ -67,16 +68,6 @@ export default function AlunosPage() {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="p-8">
-        <div className="flex h-64 items-center justify-center">
-          <div className="text-white/70">Carregando alunos...</div>
-        </div>
-      </div>
-    );
-  }
-
   if (error) {
     return (
       <div className="p-8">
@@ -98,12 +89,17 @@ export default function AlunosPage() {
           customButton={<AddAlunoDialog onAlunoCreated={handleAlunoCreated} />}
           margin={5}
         />
-        <div className="mt-5 min-w-full rounded-[8px] border border-white/30 bg-[#151515] px-4 py-2 text-white/30">
-          Procurar Aluno
-        </div>
+
+        {loading ? (
+          <Loader text="Carregando alunos..." size="lg" />
+        ) : (
+          <div className="mt-5 min-w-full rounded-[8px] border border-white/30 bg-[#151515] px-4 py-2 text-white/30">
+            Procurar Aluno
+          </div>
+        )}
       </div>
 
-      <AlunosTable alunos={alunos} />
+      {!loading && <AlunosTable alunos={alunos} />}
     </div>
   );
 }

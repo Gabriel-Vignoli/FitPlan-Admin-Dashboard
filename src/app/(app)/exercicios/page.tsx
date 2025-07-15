@@ -4,6 +4,7 @@ import CreateExerciseDialog from "@/components/CreateExerciseDialog";
 import DeleteButton from "@/components/DeleteButton";
 import EditExerciseDialog from "@/components/EditExerciseDialog";
 import Header from "@/components/Header";
+import Loader from "@/components/Loader";
 import { Plus, Dumbbell } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
@@ -19,11 +20,10 @@ interface Exercise {
 export default function ExercisesPage() {
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true); // Start with true for initial load
 
   useEffect(() => {
     async function fetchExercises() {
-      setLoading(true);
       try {
         const response = await fetch("/api/exercises");
 
@@ -57,27 +57,6 @@ export default function ExercisesPage() {
     );
   };
 
-  if (loading) {
-    return (
-      <div className="p-8">
-        <div className="flex h-64 items-center justify-center">
-          <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-white"></div>
-          <div className="ml-4 text-white/70">Carregando exercícios...</div>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="p-8">
-        <div className="rounded-[8px] border border-red-500/30 bg-red-500/10 p-4">
-          <p className="text-red-400">Erro ao carregar exercícios: {error}</p>
-        </div>
-      </div>
-    );
-  }
-
   const handleExerciseDeleted = (id: string) => {
     setExercises((prevExercises) =>
       prevExercises.filter((exercise) => exercise.id !== id),
@@ -97,7 +76,17 @@ export default function ExercisesPage() {
         margin={8}
       />
 
-      {exercises.length === 0 ? (
+      <div className="mt-5 min-w-full rounded-[8px] border border-white/30 bg-[#151515] px-4 py-2 text-white/30">
+        Procurar Exercício
+      </div>
+
+      {loading ? (
+        <Loader text="Carregando exercícios..." size="lg" />
+      ) : error ? (
+        <div className="mt-6 rounded-[8px] border border-red-500/30 bg-red-500/10 p-4">
+          <p className="text-red-400">Erro ao carregar exercícios: {error}</p>
+        </div>
+      ) : exercises.length === 0 ? (
         <div className="flex h-64 flex-col items-center justify-center text-center">
           <Dumbbell className="mb-4 h-16 w-16 text-white/40" />
           <p className="text-lg text-white/70">Nenhum exercício encontrado</p>
@@ -142,7 +131,7 @@ export default function ExercisesPage() {
                   <EditExerciseDialog
                     exercise={exercise}
                     onExerciseUpdated={handleExerciseUpdated}
-                  ></EditExerciseDialog>
+                  />
 
                   <DeleteButton
                     id={exercise.id}
