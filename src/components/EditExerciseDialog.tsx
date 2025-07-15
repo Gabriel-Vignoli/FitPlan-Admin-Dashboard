@@ -152,7 +152,7 @@ export default function EditExerciseDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" size="sm" className="flex-1 rounded-[8px]">
+        <Button variant="outline" className="flex-1 hover:bg-blue-600/20 hover:text-white text-blue-400 border border-blue-500/40 hover:border-blue-500/60">
           <Edit className="mr-2 h-4 w-4" />
           Editar
         </Button>

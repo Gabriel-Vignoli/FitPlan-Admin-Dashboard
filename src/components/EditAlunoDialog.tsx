@@ -182,9 +182,10 @@ export default function EditAlunoDialog({ student, onStudentUpdated }: EditAluno
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <button className="p-2 bg-white/10 hover:bg-blue-500/30 text-white/70 hover:text-blue-500 transition-colors rounded-[4px]">
+        <Button variant="outline" className="flex-1 hover:bg-blue-600/20 hover:text-white text-blue-400 border border-blue-500/40 hover:border-blue-500/60">
           <Edit className="w-4 h-4" />
-        </button>
+          Editar
+        </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-4xl bg-gradient-to-br from-black to-[#101010] rounded-[8px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>

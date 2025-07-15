@@ -138,7 +138,7 @@ export default function ExercisesPage() {
                   </p>
                 </div>
 
-                <div className="flex gap-2 pt-2">
+                <div className="flex gap-2 flex-wrap">
                   <EditExerciseDialog
                     exercise={exercise}
                     onExerciseUpdated={handleExerciseUpdated}
