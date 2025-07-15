@@ -7,9 +7,38 @@ import {
   isValidPhone,
 } from "@/lib/utils/validations";
 
-// Find all users
-export async function GET() {
+// Find all users or search by name
+export async function GET(request: NextRequest) {
   try {
+    const { searchParams } = new URL(request.url);
+    const searchQuery = searchParams.get("q");
+
+    // If there's a search query, perform search
+    if (searchQuery && searchQuery.length >= 2) {
+      const students = await prisma.student.findMany({
+        where: {
+          name: {
+            contains: searchQuery,
+            mode: "insensitive",
+          },
+        },
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          phone: true,
+          isActive: true,
+        },
+        orderBy: {
+          name: "asc",
+        },
+        take: 10,
+      });
+
+      return NextResponse.json(students);
+    }
+
+    // If no search query, return all students
     const alunos = await prisma.student.findMany({
       orderBy: {
         createdAt: "desc",

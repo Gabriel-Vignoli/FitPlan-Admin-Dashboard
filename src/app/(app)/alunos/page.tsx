@@ -2,7 +2,7 @@
 
 import Header from "@/components/Header";
 import AlunosTable from "@/components/AlunosTable";
-
+import StudentSearch from "@/components/AlunoSearch";
 import { Plus } from "lucide-react";
 import { useEffect, useState } from "react";
 import AddAlunoDialog from "@/components/CreateAlunoDialog";
@@ -19,31 +19,22 @@ interface Aluno {
   };
 }
 
+interface SearchStudent {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  isActive: boolean;
+}
+
 export default function AlunosPage() {
   const [alunos, setAlunos] = useState<Aluno[]>([]);
+  const [filteredAlunos, setFilteredAlunos] = useState<Aluno[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isSearching, setIsSearching] = useState(false);
 
   useEffect(() => {
-    async function fetchAlunos() {
-      try {
-        const response = await fetch("/api/alunos");
-
-        if (!response.ok) {
-          throw new Error("Failed to fetch alunos");
-        }
-
-        const data = await response.json();
-        setAlunos(data);
-      } catch (err) {
-        const errorMessage =
-          err instanceof Error ? err.message : "An unknown error occurred";
-        setError(errorMessage);
-      } finally {
-        setLoading(false);
-      }
-    }
-
     fetchAlunos();
   }, []);
 
@@ -53,6 +44,7 @@ export default function AlunosPage() {
 
   const fetchAlunos = async () => {
     try {
+      setLoading(true);
       const response = await fetch("/api/alunos");
 
       if (!response.ok) {
@@ -61,12 +53,28 @@ export default function AlunosPage() {
 
       const data = await response.json();
       setAlunos(data);
+      setFilteredAlunos(data);
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : "An unknown error occurred";
       setError(errorMessage);
+    } finally {
+      setLoading(false);
     }
   };
+
+  const handleSearchResults = (searchResults: SearchStudent[]) => {
+    if (searchResults.length === 0) {
+      setFilteredAlunos(alunos);
+      setIsSearching(false);
+    } else {
+      const searchIds = searchResults.map(student => student.id);
+      const filtered = alunos.filter(aluno => searchIds.includes(aluno.id));
+      setFilteredAlunos(filtered);
+      setIsSearching(true);
+    }
+  };
+
 
   if (error) {
     return (
@@ -93,13 +101,25 @@ export default function AlunosPage() {
         {loading ? (
           <Loader text="Carregando alunos..." size="lg" />
         ) : (
-          <div className="mt-5 min-w-full rounded-[8px] border border-white/30 bg-[#151515] px-4 py-2 text-white/30">
-            Procurar Aluno
+          <div className="mt-5">
+            <StudentSearch
+              onSearchResults={handleSearchResults}
+              placeholder="Buscar aluno por nome..."
+            />
           </div>
         )}
       </div>
 
-      {!loading && <AlunosTable alunos={alunos} />}
+      {!loading && (
+        <div>
+          {isSearching && (
+            <div className="mb-4 text-sm text-white/70">
+              Mostrando {filteredAlunos.length} resultado(s) da busca
+            </div>
+          )}
+          <AlunosTable alunos={filteredAlunos} />
+        </div>
+      )}
     </div>
   );
 }
