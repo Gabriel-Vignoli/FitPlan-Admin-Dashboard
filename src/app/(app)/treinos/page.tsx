@@ -1,5 +1,6 @@
 'use client'
 
+import CreateWorkoutDialog from "@/components/CreateWorkoutDialog";
 import Header from "@/components/Header";
 import Loader from "@/components/Loader";
 import WorkoutCard from "@/components/WorkoutCard";
@@ -63,6 +64,10 @@ export default function WorkoutsPage() {
     fetchWorkouts();
   }, []);
 
+  const handleWorkoutCreated = (newWorkout: Workout) => {
+    setWorkouts((prevWorkouts) => [...prevWorkouts, newWorkout]);
+  };
+
   return (
     <div className="p-8">
       <Header
@@ -70,6 +75,7 @@ export default function WorkoutsPage() {
         description="Escolha os exercícios ideais para os treinos de seus alunos"
         buttonText="Adicionar Treino"
         icon={<Plus />}
+        customButton={<CreateWorkoutDialog onWorkoutCreated={handleWorkoutCreated}></CreateWorkoutDialog>}
         margin={8}
       />
 
