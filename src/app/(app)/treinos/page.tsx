@@ -68,6 +68,14 @@ export default function WorkoutsPage() {
     setWorkouts((prevWorkouts) => [...prevWorkouts, newWorkout]);
   };
 
+  const handleWorkoutUpdated = (updatedWorkout: Workout) => {
+    setWorkouts((prevWorkouts) =>
+      prevWorkouts.map((workout) =>
+        workout.id === updatedWorkout.id ? updatedWorkout : workout
+      )
+    );
+  };
+
   return (
     <div className="p-8">
       <Header
@@ -88,7 +96,11 @@ export default function WorkoutsPage() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6 auto-rows-fr">
           {workouts.map((workout) => (
-            <WorkoutCard key={workout.id} workout={workout} />
+            <WorkoutCard 
+              key={workout.id} 
+              workout={workout} 
+              onWorkoutUpdated={handleWorkoutUpdated}
+            />
           ))}
         </div>
       )}

@@ -1,6 +1,7 @@
 import { Clock, Dumbbell, Target } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
+import EditWorkoutDialog from "./EditWorkoutDialog";
 
 interface Exercise {
   id: string;
@@ -33,9 +34,10 @@ interface Workout {
 
 interface WorkoutProps {
   workout: Workout;
+  onWorkoutUpdated: (updatedWorkout: Workout) => void;
 }
 
-export default function WorkoutCard({ workout }: WorkoutProps) {
+export default function WorkoutCard({ workout, onWorkoutUpdated }: WorkoutProps) {
   const totalSets = workout.exercises.reduce(
     (sum, exercise) => sum + exercise.sets,
     0,
@@ -53,6 +55,9 @@ export default function WorkoutCard({ workout }: WorkoutProps) {
           <p className="line-clamp-2 text-xs text-white/60 sm:text-sm">
             {workout.description}
           </p>
+        </div>
+        <div>
+          <EditWorkoutDialog onWorkoutUpdated={onWorkoutUpdated} workout={workout}></EditWorkoutDialog>
         </div>
       </div>
 
@@ -79,9 +84,9 @@ export default function WorkoutCard({ workout }: WorkoutProps) {
         ))}
       </div>
 
-      {/* Notes section if any exercise has notes */}
+      {/* Notes section */}
       {workout.exercises.some((exercise) => exercise.notes) && (
-        <div className="relative z-10 mt-4 rounded-xl border border-white/10 bg-white/5 p-3 sm:mt-6 sm:p-4">
+        <div className="relative z-10 mt-4 rounded-[8px] border border-white/10 bg-white/5 p-3 sm:mt-6 sm:p-4">
           <h4 className="mb-2 text-xs font-semibold text-white sm:text-sm">
             Observações:
           </h4>
@@ -114,7 +119,7 @@ function ExerciseItem({
 
   return (
     <div className="flex items-center gap-2.5 rounded-[6px] border border-white/5 bg-white/5 p-2.5 backdrop-blur-sm transition-all duration-200 hover:border-white/10 hover:bg-white/10 sm:gap-4 sm:rounded-[8px] sm:p-4">
-      {/* Exercise Image or Fallback */}
+      {/* Exercise Image */}
       <div className="relative h-10 w-10 flex-shrink-0 overflow-hidden rounded-[6px] bg-white/5 sm:h-12 sm:w-12 sm:rounded-[8px] lg:h-16 lg:w-16">
         {!imageError && exercise.exercise.imageUrl ? (
           <Image
