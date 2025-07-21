@@ -23,7 +23,8 @@ interface DeleteButtonProps {
   variant?: "default" | "button";
 }
 
-export default function DeleteButton({ id, endpoint, itemName, onDeleted, variant = "default" }: DeleteButtonProps) {
+export default function 
+DeleteButton({ id, endpoint, itemName, onDeleted, variant = "default" }: DeleteButtonProps) {
   const [isDeleting, setIsDeleting] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
 

@@ -76,6 +76,10 @@ export default function WorkoutsPage() {
     );
   };
 
+  const handleWorkoutDeleted = (id: string) => {
+    setWorkouts((prevWorkouts) => prevWorkouts.filter((workout) => workout.id !== id));
+  };
+
   return (
     <div className="p-8">
       <Header
@@ -100,6 +104,7 @@ export default function WorkoutsPage() {
               key={workout.id} 
               workout={workout} 
               onWorkoutUpdated={handleWorkoutUpdated}
+              onWorkoutDeleted={handleWorkoutDeleted}
             />
           ))}
         </div>

@@ -18,7 +18,7 @@ interface UpdateWorkoutRequest {
 
 export async function PUT(
   request: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const body: UpdateWorkoutRequest = await request.json();
@@ -32,19 +32,21 @@ export async function PUT(
     if (!existingWorkout) {
       return NextResponse.json(
         { error: "Treino não encontrado" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
     if (exercises && exercises.length < 1) {
       return NextResponse.json(
-        { error: "Você precisa adicionar pelo menos um exercício no seu treino" },
-        { status: 400 }
+        {
+          error: "Você precisa adicionar pelo menos um exercício no seu treino",
+        },
+        { status: 400 },
       );
     }
 
     const updatedWorkout = await prisma.$transaction(async (tx) => {
-        // It will update the title or the description
+      // It will update the title or the description
       await tx.workout.update({
         where: { id },
         data: {
@@ -92,7 +94,39 @@ export async function PUT(
     console.error("Error updating workout:", error);
     return NextResponse.json(
       { error: "Erro interno do servidor" },
-      { status: 500 }
+      { status: 500 },
+    );
+  }
+}
+
+export async function DELETE({ params }: { params: Promise<{ id: string }> }) {
+  try {
+    const { id } = await params;
+
+    const existingWorkout = await prisma.workout.findUnique({
+      where: { id },
+    });
+
+    if (!existingWorkout) {
+      return NextResponse.json(
+        { error: "Treino não encontrado" },
+        { status: 404 },
+      );
+    }
+
+    await prisma.workout.delete({
+      where: { id },
+    });
+
+    return NextResponse.json(
+      { error: "Treino excluido com sucesso" },
+      { status: 200 },
+    );
+  } catch (error) {
+    console.error("Erro ao excluir plano:", error);
+    return NextResponse.json(
+      { error: "Falha ao excluir plano" },
+      { status: 500 },
     );
   }
 }

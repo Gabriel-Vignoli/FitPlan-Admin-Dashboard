@@ -2,6 +2,7 @@ import { Clock, Dumbbell, Target } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
 import EditWorkoutDialog from "./EditWorkoutDialog";
+import DeleteButton from "./DeleteButton";
 
 interface Exercise {
   id: string;
@@ -35,9 +36,10 @@ interface Workout {
 interface WorkoutProps {
   workout: Workout;
   onWorkoutUpdated: (updatedWorkout: Workout) => void;
+  onWorkoutDeleted: (id: string) => void;
 }
 
-export default function WorkoutCard({ workout, onWorkoutUpdated }: WorkoutProps) {
+export default function WorkoutCard({ workout, onWorkoutUpdated, onWorkoutDeleted }: WorkoutProps) {
   const totalSets = workout.exercises.reduce(
     (sum, exercise) => sum + exercise.sets,
     0,
@@ -56,8 +58,9 @@ export default function WorkoutCard({ workout, onWorkoutUpdated }: WorkoutProps)
             {workout.description}
           </p>
         </div>
-        <div>
+        <div className="flex gap-2">
           <EditWorkoutDialog onWorkoutUpdated={onWorkoutUpdated} workout={workout}></EditWorkoutDialog>
+          <DeleteButton endpoint="/api/workouts" id={workout.id} itemName="Treino" onDeleted={onWorkoutDeleted} variant="default"></DeleteButton>
         </div>
       </div>
 
