@@ -4,6 +4,7 @@ import CreateWorkoutDialog from "@/components/CreateWorkoutDialog";
 import Header from "@/components/Header";
 import Loader from "@/components/Loader";
 import WorkoutCard from "@/components/WorkoutCard";
+import WorkoutSearch from "@/components/WorkoutSearch";
 import { Plus } from "lucide-react";
 import { useEffect, useState } from "react";
 
@@ -36,10 +37,18 @@ interface Workout {
   exercises: WorkoutExercise[];
 }
 
+interface SearchWorkout {
+  id: string;
+  title: string;
+  description: string;
+}
+
 export default function WorkoutsPage() {
   const [workouts, setWorkouts] = useState<Workout[]>([]);
+  const [filteredWorkouts, setFilteredWorkouts] = useState<Workout[]>([])
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isSearching, setIsSearching] = useState(false)
 
   useEffect(() => {
     async function fetchWorkouts() {
@@ -63,6 +72,18 @@ export default function WorkoutsPage() {
 
     fetchWorkouts();
   }, []);
+
+  const handleSearchResults = (searchResults: SearchWorkout[]) => {
+     if (searchResults.length === 0) {
+      setFilteredWorkouts(workouts)
+      setIsSearching(false)
+     } else {
+      const searchIds = searchResults.map(workout => workout.id)
+      const filterd = workouts.filter(workout => searchIds.includes(workout.id))
+      setFilteredWorkouts(filterd)
+      setIsSearching(true)
+     }
+  }
 
   const handleWorkoutCreated = (newWorkout: Workout) => {
     setWorkouts((prevWorkouts) => [...prevWorkouts, newWorkout]);
@@ -98,8 +119,20 @@ export default function WorkoutsPage() {
           <p className="text-red-400">Erro ao carregar treinos: {error}</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6 auto-rows-fr">
-          {workouts.map((workout) => (
+        <div className="mb-8">
+         <WorkoutSearch onSearchResults={handleSearchResults}></WorkoutSearch>
+         </div>
+      )}
+
+      {!loading && (
+        <div>
+          {isSearching && (
+            <div className="mb-4 text-sm text-white/70">
+              Monstando {filteredWorkouts.length} resultado(s) da busca
+            </div>
+          )}
+           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6 auto-rows-fr">
+          {filteredWorkouts.map((workout) => (
             <WorkoutCard 
               key={workout.id} 
               workout={workout} 
@@ -107,6 +140,7 @@ export default function WorkoutsPage() {
               onWorkoutDeleted={handleWorkoutDeleted}
             />
           ))}
+        </div>
         </div>
       )}
     </div>

@@ -16,8 +16,34 @@ interface CreateWorkoutRequest {
   exercisesId?: ExerciseData[];
 }
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
+const { searchParams } = new URL(request.url)
+const searchQuery = searchParams.get("q")
+
+if (searchQuery && searchQuery.length >=2) {
+  const workouts = await prisma.workout.findMany({
+    where: {
+      title: {
+        contains: searchQuery,
+        mode: "insensitive"
+      }
+    },
+    include: {
+      exercises: {
+        include: {
+          exercise: true
+        },
+        orderBy: { order: "asc" }
+      }
+    },
+    orderBy: { createdAt: "desc" },
+    take: 10
+  })
+
+  return NextResponse.json(workouts);
+}
+
     const workouts = await prisma.workout.findMany({
       include: {
         exercises: {
