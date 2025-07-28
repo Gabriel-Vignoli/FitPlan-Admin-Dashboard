@@ -8,13 +8,13 @@ import DeleteButton from "@/components/DeleteButton";
 import Header from "@/components/Header";
 import EditAlunoDialog from "@/components/EditAlunoDialog";
 import Loader from "@/components/Loader";
-import { formatDayofWeekToDay } from "@/lib/utils/formatters";
+import AlunoWorkouts from "@/components/AlunoWorkouts";
 
 interface Plan {
   id: string;
   name: string;
   price: number;
-  duration: number;
+  duration: number; 
   description: string;
   isActive: boolean;
   createdAt: string;
@@ -208,74 +208,7 @@ export default function AlunoPage() {
           </div>
           
           {/* Workouts Section */}
-          {student.workouts && student.workouts.length > 0 && (
-            <div className="mt-8 w-full max-w-4xl">
-              <h3 className="text-xl font-semibold mb-4">Treinos do Aluno</h3>
-              <div className="grid gap-4">
-                {student.workouts
-                  .sort((a, b) => a.dayOfWeek - b.dayOfWeek)
-                  .map((studentWorkout) => (
-                    <div
-                      key={studentWorkout.id}
-                      className="border-white/30 border rounded-[8px] p-4 bg-[#060606] shadow-sm"
-                    >
-                      <div className="flex justify-between items-start mb-3">
-                        <div>
-                          <h4 className="font-medium text-lg">
-                            {formatDayofWeekToDay(studentWorkout.dayOfWeek)}: {studentWorkout.workout.title}
-                          </h4>
-                          {studentWorkout.workout.description && (
-                            <p className="text-sm text-white/60">
-                              {studentWorkout.workout.description}
-                            </p>
-                          )}
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span
-                            className={`rounded-full px-3 py-1 text-sm font-medium ${
-                              studentWorkout.isActive
-                                ? "bg-green-500/20 text-green-400"
-                                : "bg-red-500/20 text-red-400"
-                            }`}
-                          >
-                            {studentWorkout.isActive ? "Ativo" : "Inativo"}
-                          </span>
-                        </div>
-                      </div>
-                      
-                      {/* Workout Exercises */}
-                      {studentWorkout.workout.exercises.length > 0 && (
-                        <div className="mt-3">
-                          <h5 className="font-medium mb-2">Exercícios:</h5>
-                          <div className="space-y-2">
-                            {studentWorkout.workout.exercises.map((workoutExercise) => (
-                              <div
-                                key={workoutExercise.id}
-                                className="flex items-center justify-between p-3 bg-[#101010] rounded-[8px] hover:bg-[#151515] hover:scale-[1.01] transition"
-                              >
-                                <div className="flex-1">
-                                  <span className="font-medium">
-                                    {workoutExercise.exercise.name}
-                                  </span>
-                                  <span className="text-sm text-white/70 ml-2">
-                                    ({workoutExercise.exercise.targetMuscle})
-                                  </span>
-                                </div>
-                                <div className="text-sm text-white/70">
-                                  {workoutExercise.sets} séries × {workoutExercise.reps} reps
-                                  {workoutExercise.rest && ` - s: ${workoutExercise.rest}`}
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  ))}
-              </div>
-            </div>
-          )}
-          
+          <AlunoWorkouts id={student.id} workouts={student.workouts}></AlunoWorkouts>
           
         </div>
       )}
