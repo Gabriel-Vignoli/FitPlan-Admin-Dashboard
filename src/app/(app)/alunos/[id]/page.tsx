@@ -8,6 +8,7 @@ import DeleteButton from "@/components/DeleteButton";
 import Header from "@/components/Header";
 import EditAlunoDialog from "@/components/EditAlunoDialog";
 import Loader from "@/components/Loader";
+import { formatDayofWeekToDay } from "@/lib/utils/formatters";
 
 interface Plan {
   id: string;
@@ -85,7 +86,7 @@ interface Student extends DialogStudent {
   workouts: StudentWorkout[];
 }
 
-export default function EditAlunoPage() {
+export default function AlunoPage() {
   const router = useRouter();
   const params = useParams();
   const [student, setStudent] = useState<Student | null>(null);
@@ -193,6 +194,18 @@ export default function EditAlunoPage() {
         <div className="flex items-center flex-col">
           {/* Student Info Component */}
           <StudentInfoComponent student={student} plan={plan} />
+
+          {/* Additional Actions */}
+          <div className="mt-8 flex flex-wrap justify-center gap-3 md:justify-start">
+            <EditAlunoDialog student={student} onStudentUpdated={handleStudentUpdated} />
+            <DeleteButton
+              endpoint="/api/alunos"
+              itemName="Aluno"
+              id={student.id}
+              variant="button"
+              onDeleted={handleStudentDeleted}
+            />
+          </div>
           
           {/* Workouts Section */}
           {student.workouts && student.workouts.length > 0 && (
@@ -204,31 +217,25 @@ export default function EditAlunoPage() {
                   .map((studentWorkout) => (
                     <div
                       key={studentWorkout.id}
-                      className="border rounded-lg p-4 bg-white shadow-sm"
+                      className="border-white/30 border rounded-[8px] p-4 bg-[#060606] shadow-sm"
                     >
                       <div className="flex justify-between items-start mb-3">
                         <div>
                           <h4 className="font-medium text-lg">
-                            {studentWorkout.workout.title}
+                            {formatDayofWeekToDay(studentWorkout.dayOfWeek)}: {studentWorkout.workout.title}
                           </h4>
-                          <p className="text-sm text-gray-600">
-                            Dia da semana: {studentWorkout.dayOfWeek}
-                          </p>
                           {studentWorkout.workout.description && (
-                            <p className="text-sm text-gray-600 mt-1">
+                            <p className="text-sm text-white/60">
                               {studentWorkout.workout.description}
                             </p>
                           )}
                         </div>
                         <div className="flex items-center gap-2">
-                          {studentWorkout.workout.isFavorite && (
-                            <span className="text-yellow-500">⭐</span>
-                          )}
                           <span
-                            className={`px-2 py-1 rounded text-xs ${
+                            className={`rounded-full px-3 py-1 text-sm font-medium ${
                               studentWorkout.isActive
-                                ? "bg-green-100 text-green-800"
-                                : "bg-gray-100 text-gray-800"
+                                ? "bg-green-500/20 text-green-400"
+                                : "bg-red-500/20 text-red-400"
                             }`}
                           >
                             {studentWorkout.isActive ? "Ativo" : "Inativo"}
@@ -244,20 +251,19 @@ export default function EditAlunoPage() {
                             {studentWorkout.workout.exercises.map((workoutExercise) => (
                               <div
                                 key={workoutExercise.id}
-                                className="flex items-center justify-between p-2 bg-gray-50 rounded"
+                                className="flex items-center justify-between p-3 bg-[#101010] rounded-[8px] hover:bg-[#151515] hover:scale-[1.01] transition"
                               >
                                 <div className="flex-1">
                                   <span className="font-medium">
                                     {workoutExercise.exercise.name}
                                   </span>
-                                  <span className="text-sm text-gray-600 ml-2">
+                                  <span className="text-sm text-white/70 ml-2">
                                     ({workoutExercise.exercise.targetMuscle})
                                   </span>
                                 </div>
-                                <div className="text-sm text-gray-600">
-                                  {workoutExercise.sets} sets × {workoutExercise.reps} reps
-                                  {workoutExercise.weight && ` - ${workoutExercise.weight}`}
-                                  {workoutExercise.rest && ` - Rest: ${workoutExercise.rest}`}
+                                <div className="text-sm text-white/70">
+                                  {workoutExercise.sets} séries × {workoutExercise.reps} reps
+                                  {workoutExercise.rest && ` - s: ${workoutExercise.rest}`}
                                 </div>
                               </div>
                             ))}
@@ -270,17 +276,7 @@ export default function EditAlunoPage() {
             </div>
           )}
           
-          {/* Additional Actions */}
-          <div className="mt-8 flex flex-wrap justify-center gap-3 md:justify-start">
-            <EditAlunoDialog student={student} onStudentUpdated={handleStudentUpdated} />
-            <DeleteButton
-              endpoint="/api/alunos"
-              itemName="Aluno"
-              id={student.id}
-              variant="button"
-              onDeleted={handleStudentDeleted}
-            />
-          </div>
+          
         </div>
       )}
     </div>
