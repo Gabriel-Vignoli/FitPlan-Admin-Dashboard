@@ -81,3 +81,35 @@ export function formatDayofWeekToDay(day: number) {
       return "Dia inválido"
   }
 }
+
+export function formatDayToNumber(dayName: string): number {
+  switch (dayName.toLowerCase()) {
+    case "segunda":
+    case "segunda-feira":
+      return 1;
+    case "terça":
+    case "terça-feira":
+    case "terca":
+    case "terca-feira":
+      return 2;
+    case "quarta":
+    case "quarta-feira":
+      return 3;
+    case "quinta":
+    case "quinta-feira":
+      return 4;
+    case "sexta":
+    case "sexta-feira":
+      return 5;
+    case "sabado":
+    case "sábado":
+    case "sabado-feira":
+    case "sábado-feira":
+      return 6;
+    case "domingo":
+    case "domingo-feira":
+      return 7;
+    default:
+      return 0; 
+  }
+}
