@@ -5,6 +5,7 @@ import { Dumbbell } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import AddWorkoutToAlunoDialog from "./AddWorkoutToAlunoDialog";
+import EditStudentWorkoutDialog from "./EditStudentWorkoutDialog";
 
 interface Exercise {
   id: string;
@@ -97,6 +98,14 @@ export default function AlunoWorkouts({
     setWorkouts((prevWorkouts) => [...prevWorkouts, newWorkout]);
   };
 
+   const handleWorkoutUpdated = (updatedWorkout: StudentWorkout) => {
+    setWorkouts((prevWorkouts) =>
+      prevWorkouts.map((workout) =>
+        workout.id === updatedWorkout.id ? updatedWorkout : workout
+      )
+    );
+  };
+
   if (loading) {
     return (
       <div className="mt-8 w-full max-w-4xl">
@@ -180,6 +189,7 @@ export default function AlunoWorkouts({
                   >
                     {studentWorkout.isActive ? "Ativo" : "Inativo"}
                   </span>
+                   <EditStudentWorkoutDialog studentWorkout={studentWorkout} onWorkoutUpdated={handleWorkoutUpdated}></EditStudentWorkoutDialog>
                 </div>
               </div>
 
