@@ -126,7 +126,7 @@ export default function EditExerciseDialog({
     }
   };
 
-  const handleVideoChange = (e: React.ChangeEvent<HTMLInputInput>) => {
+  const handleVideoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       setVideoFile(file);
