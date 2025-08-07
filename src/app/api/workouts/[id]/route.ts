@@ -99,7 +99,10 @@ export async function PUT(
   }
 }
 
-export async function DELETE({ params }: { params: Promise<{ id: string }> }) {
+export async function DELETE(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
     const { id } = await params;
 
@@ -119,7 +122,7 @@ export async function DELETE({ params }: { params: Promise<{ id: string }> }) {
     });
 
     return NextResponse.json(
-      { error: "Treino excluido com sucesso" },
+      { message: "Treino excluído com sucesso" },
       { status: 200 },
     );
   } catch (error) {
