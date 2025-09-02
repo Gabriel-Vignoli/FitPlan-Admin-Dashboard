@@ -1,20 +1,17 @@
-import jwt, { JwtPayload } from 'jsonwebtoken' // Usado no runtime Node.js
-import bcrypt from 'bcryptjs' // Biblioteca para criptografar e comparar senhas
-import { cookies } from 'next/headers' // API do Next.js para acessar cookies no lado do servidor
-import { SignJWT, jwtVerify } from 'jose' // Usado no runtime Edge
+import jwt, { JwtPayload } from 'jsonwebtoken' 
+import bcrypt from 'bcryptjs' 
+import { cookies } from 'next/headers' 
+import { SignJWT, jwtVerify } from 'jose' 
 
-// Chave secreta usada para assinar/verificar JWTs
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key'
 const secret = new TextEncoder().encode(JWT_SECRET)
 
-// Define a estrutura dos dados do administrador
 export interface AdminData {
   id: string
   name: string
   email: string
 }
 
-// Interface estendida para o payload do JWT (Node.js)
 interface AdminJwtPayload extends JwtPayload {
   id: string
   email: string
@@ -52,9 +49,9 @@ export async function generateTokenEdge(adminData: AdminData): Promise<string> {
     name: adminData.name
   })
     .setProtectedHeader({ alg: 'HS256' })
-    .setIssuedAt() // Define a data de emissão do token
-    .setExpirationTime('7d') // Expiração em 7 dias
-    .sign(secret) // Assina o token com a chave secreta
+    .setIssuedAt() 
+    .setExpirationTime('7d') 
+    .sign(secret) 
 }
 
 // Verifica e decodifica um token JWT (Node.js runtime)
@@ -67,7 +64,7 @@ export function verifyToken(token: string): AdminData | null {
       name: decoded.name
     }
   } catch {
-    return null // Token inválido ou expirado
+    return null 
   }
 }
 
@@ -81,7 +78,7 @@ export async function verifyTokenEdge(token: string): Promise<AdminData | null> 
       name: payload.name as string
     }
   } catch {
-    return null // Token inválido ou expirado
+    return null 
   }
 }
 
