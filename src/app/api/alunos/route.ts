@@ -7,61 +7,131 @@ import {
   isValidPhone,
 } from "@/lib/utils/validations";
 
-// Find all users or search by name
+// Find all users or search by name with pagination
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const searchQuery = searchParams.get("q");
+    const page = parseInt(searchParams.get("page") || "1");
+    const limit = parseInt(searchParams.get("limit") || "10");
+    const sortBy = searchParams.get("sortBy") || "createdAt";
+    const sortOrder = searchParams.get("sortOrder") || "desc";
 
-    // If there's a search query, perform search
+    const skip = (page - 1) * limit;
+
     if (searchQuery && searchQuery.length >= 2) {
-      const students = await prisma.student.findMany({
-        where: {
-          name: {
-            contains: searchQuery,
-            mode: "insensitive",
+      const whereClause = {
+        name: {
+          contains: searchQuery,
+          mode: "insensitive" as const,
+        },
+      };
+
+      const [students, totalCount] = await Promise.all([
+        prisma.student.findMany({
+          where: whereClause,
+          skip,
+          take: limit,
+          select: {
+            id: true,
+            name: true,
+            phone: true,
+            createdAt: true,
+            paymentStatus: true,
+            plan: {
+              select: {
+                name: true
+              }
+            }
           },
+          orderBy: {
+            [sortBy]: sortOrder as "asc" | "desc",
+          },
+        }),
+        prisma.student.count({
+          where: whereClause,
+        })
+      ]);
+
+      const totalPages = Math.ceil(totalCount / limit);
+      const hasNextPage = page < totalPages;
+      const hasPreviousPage = page > 1;
+
+      return NextResponse.json({
+        success: true,
+        data: {
+          alunos: students,
+          pagination: {
+            currentPage: page,
+            totalPages,
+            totalItems: totalCount,
+            itemsPerPage: limit,
+            hasNextPage,
+            hasPreviousPage
+          },
+          query: {
+            search: searchQuery,
+            sortBy,
+            sortOrder
+          }
+        }
+      });
+    }
+
+    // If no search query, return all students with pagination
+    const [alunos, totalCount] = await Promise.all([
+      prisma.student.findMany({
+        skip,
+        take: limit,
+        orderBy: {
+          [sortBy]: sortOrder as "asc" | "desc",
         },
         select: {
           id: true,
           name: true,
-          email: true,
           phone: true,
-          isActive: true,
-        },
-        orderBy: {
-          name: "asc",
-        },
-        take: 10,
-      });
-
-      return NextResponse.json(students);
-    }
-
-    // If no search query, return all students
-    const alunos = await prisma.student.findMany({
-      orderBy: {
-        createdAt: "desc",
-      },
-      select: {
-        id: true,
-        name: true,
-        phone: true,
-        createdAt: true,
-        paymentStatus: true,
-        plan: {
-          select: {
-            name: true
+          createdAt: true,
+          paymentStatus: true,
+          plan: {
+            select: {
+              name: true
+            }
           }
+        }
+      }),
+      prisma.student.count()
+    ]);
+
+    const totalPages = Math.ceil(totalCount / limit);
+    const hasNextPage = page < totalPages;
+    const hasPreviousPage = page > 1;
+
+    return NextResponse.json({
+      success: true,
+      data: {
+        alunos,
+        pagination: {
+          currentPage: page,
+          totalPages,
+          totalItems: totalCount,
+          itemsPerPage: limit,
+          hasNextPage,
+          hasPreviousPage
+        },
+        query: {
+          search: searchQuery || "",
+          sortBy,
+          sortOrder
         }
       }
     });
-
-    return NextResponse.json(alunos);
   } catch (error) {
     console.error("Error fetching alunos:", error);
     return NextResponse.json(
-      { error: "Failed to fetch alunos" },
+      { 
+        success: false,
+        error: "Failed to fetch alunos" 
+      },
       { status: 500 },
     );
   }

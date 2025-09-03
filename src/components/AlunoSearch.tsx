@@ -12,12 +12,14 @@ interface Student {
 interface StudentSearchProps {
   onStudentSelect?: (student: Student) => void;
   onSearchResults?: (students: Student[]) => void;
+  onSearchChange?: (query: string) => void; // Nova prop
   placeholder?: string;
 }
 
 export default function StudentSearch({  
   onSearchResults,
-  placeholder = "Buscar aluno por nome..." 
+  placeholder = "Buscar aluno por nome...", 
+  onSearchChange = () => {}
 }: StudentSearchProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(false);
@@ -65,13 +67,15 @@ export default function StudentSearch({
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setSearchQuery(value);
-    
-    if (value.length === 0) {
-      onSearchResults?.([]);
-    }
-  };
+  const value = e.target.value;
+  setSearchQuery(value);
+
+  onSearchChange?.(value); // Dispara sempre que digitar
+
+  if (value.length === 0) {
+    onSearchResults?.([]);
+  }
+};
 
   return (
     <div className="relative">

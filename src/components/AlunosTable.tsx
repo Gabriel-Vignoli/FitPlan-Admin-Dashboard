@@ -28,13 +28,27 @@ interface Aluno {
 
 interface AlunosTableProps {
   alunos: Aluno[];
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
+  onSortChange?: (field: string) => void;
+  getSortIcon?: (field: string) => React.ReactNode;
 }
 
-export default function AlunosTable({ alunos }: AlunosTableProps) {
+export default function AlunosTable({ 
+  alunos,  
+  onSortChange, 
+  getSortIcon 
+}: AlunosTableProps) {
   const router = useRouter();
 
   const handleNavigateToAluno = (alunoId: string) => {
     router.push(`/alunos/${alunoId}`);
+  };
+
+  const handleSort = (field: string) => {
+    if (onSortChange) {
+      onSortChange(field);
+    }
   };
 
   if (alunos.length === 0) {
@@ -52,11 +66,35 @@ export default function AlunosTable({ alunos }: AlunosTableProps) {
         <Table className="rounded-[8px] border border-white/20">
           <TableHeader className="bg-[#101010] text-white/70">
             <TableRow className="border-white/10 hover:bg-white/5">
-              <TableHead className="text-white/70">NOME</TableHead>
+              <TableHead 
+                className={`text-white/70 ${onSortChange ? 'cursor-pointer hover:text-white' : ''}`}
+                onClick={() => handleSort('name')}
+              >
+                <div className="flex items-center space-x-1">
+                  <span>NOME</span>
+                  {getSortIcon && <span>{getSortIcon('name')}</span>}
+                </div>
+              </TableHead>
               <TableHead className="text-white/70">CELULAR</TableHead>
               <TableHead className="text-white/70">PLANO</TableHead>
-              <TableHead className="text-white/70">DESDE</TableHead>
-              <TableHead className="text-white/70">STATUS</TableHead>
+              <TableHead 
+                className={`text-white/70 ${onSortChange ? 'cursor-pointer hover:text-white' : ''}`}
+                onClick={() => handleSort('createdAt')}
+              >
+                <div className="flex items-center space-x-1">
+                  <span>DESDE</span>
+                  {getSortIcon && <span>{getSortIcon('createdAt')}</span>}
+                </div>
+              </TableHead>
+              <TableHead 
+                className={`text-white/70 ${onSortChange ? 'cursor-pointer hover:text-white' : ''}`}
+                onClick={() => handleSort('paymentStatus')}
+              >
+                <div className="flex items-center space-x-1">
+                  <span>STATUS</span>
+                  {getSortIcon && <span>{getSortIcon('paymentStatus')}</span>}
+                </div>
+              </TableHead>
               <TableHead className="text-white/70">GERENCIAR</TableHead>
             </TableRow>
           </TableHeader>
