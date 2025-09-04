@@ -2,14 +2,113 @@
 
 import Header from "@/components/Header";
 import AlunosTable from "@/components/AlunosTable";
-import { ArrowDownUp, MoveDown, MoveUp, Plus } from "lucide-react";
+import {
+  ArrowDownUp,
+  ArrowLeft,
+  ArrowRight,
+  MoveDown,
+  MoveUp,
+  Plus,
+} from "lucide-react";
 import { useState, useEffect } from "react";
 import AddAlunoDialog from "@/components/CreateAlunoDialog";
 import Loader from "@/components/Loader";
 import { usePaginatedAlunos } from "@/hooks/usePaginatedAlunos";
 import StudentSearch from "@/components/AlunoSearch";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+} from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
 
 export default function AlunosPage() {
+  function renderPagination() {
+    if (!pagination || pagination.totalPages <= 1) return null;
+    const allPages = Array.from(
+      { length: pagination.totalPages },
+      (_, i) => i + 1,
+    );
+    let pageNumbers: number[] = [];
+    if (pagination.totalPages <= 5) {
+      pageNumbers = allPages;
+    } else if (pagination.currentPage <= 3) {
+      pageNumbers = allPages.slice(0, 5);
+    } else if (pagination.currentPage >= pagination.totalPages - 2) {
+      pageNumbers = allPages.slice(-5);
+    } else {
+      pageNumbers = allPages.filter(
+        (pageNum) =>
+          pageNum >= pagination.currentPage - 2 &&
+          pageNum <= pagination.currentPage + 2,
+      );
+    }
+    return (
+      <div className="mt-6 rounded-[8px] border border-white/20 bg-[#151515] px-4 py-3">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="text-center text-sm text-white/70 sm:text-left">
+              Página{" "}
+              <span className="font-medium text-white">
+                {pagination.currentPage}
+              </span>{" "}
+              de{" "}
+              <span className="font-medium text-white">
+                {pagination.totalPages}
+              </span>
+            </p>
+          </div>
+          <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center sm:space-x-2">
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={previousPage}
+              disabled={!pagination.hasPreviousPage}
+              className="w-full rounded-[8px] sm:w-auto"
+            >
+              <ArrowLeft className="mr-1" /> Anterior
+            </Button>
+            <div className="flex w-auto justify-center space-x-1">
+              {pageNumbers.map((pageNum) => {
+                // On mobile, show only prev/current/next
+                const showOnMobile =
+                  pagination.totalPages <= 5 ||
+                  pageNum === pagination.currentPage ||
+                  pageNum === pagination.currentPage - 1 ||
+                  pageNum === pagination.currentPage + 1;
+                return (
+                  <Button
+                    key={pageNum}
+                    variant={
+                      pageNum === pagination.currentPage
+                        ? "secondary"
+                        : "outline"
+                    }
+                    size="sm"
+                    onClick={() => goToPage(pageNum)}
+                    className={`min-w-[40px] rounded-[8px] font-semibold transition-all duration-200 sm:w-auto ${pageNum === pagination.currentPage ? "border-blue-700 bg-blue-700 text-white" : "border-white/20 text-white/70 hover:bg-blue-700/30 hover:text-white"} ${showOnMobile ? "" : "hidden sm:inline-flex"}`}
+                  >
+                    {pageNum}
+                  </Button>
+                );
+              })}
+            </div>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={nextPage}
+              disabled={!pagination.hasNextPage}
+              className="w-full rounded-[8px] sm:w-auto"
+            >
+              Próxima <ArrowRight className="ml-1" />
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
   const [searchTerm, setSearchTerm] = useState("");
 
   const {
@@ -88,30 +187,11 @@ export default function AlunosPage() {
         <div className="mt-6 space-y-4">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             {/* Search Input */}
-            <div className="max-w-md flex-1">
+            <div className="w-full">
               <StudentSearch
                 placeholder="Buscar aluno por nome..."
                 onSearchChange={setSearchTerm}
               />
-            </div>
-
-            {/* Items per page selector */}
-            <div className="flex items-center space-x-2 text-white/70">
-              <label htmlFor="limit" className="text-sm font-medium">
-                Mostrar:
-              </label>
-              <select
-                id="limit"
-                value={limit}
-                onChange={(e) => updateLimit(parseInt(e.target.value))}
-                className="rounded-md border border-white/20 bg-[#151515] px-3 py-1 text-sm text-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
-              >
-                <option value={5}>5</option>
-                <option value={10}>10</option>
-                <option value={25}>25</option>
-                <option value={50}>50</option>
-              </select>
-              <span className="text-sm">por página</span>
             </div>
           </div>
 
@@ -120,15 +200,16 @@ export default function AlunosPage() {
             <div className="flex items-center text-sm text-white/70">
               <span>Buscando por: </span>
               <span className="ml-1 font-medium text-white">{search}</span>
-              <button
+              <Button
                 onClick={() => {
                   setSearchTerm("");
                   updateSearch("");
                 }}
-                className="ml-2 text-indigo-400 hover:text-indigo-300"
+                variant={"link"}
+                className="text-blue-500"
               >
                 Limpar
-              </button>
+              </Button>
             </div>
           )}
         </div>
@@ -146,27 +227,50 @@ export default function AlunosPage() {
         <div>
           {/* Results info */}
           {pagination && (
-            <div className="mb-4 text-sm text-white/70">
-              {search ? (
-                <>
-                  Mostrando {alunos.length} resultado(s) de{" "}
-                  {pagination.totalItems} para {search}
-                </>
-              ) : (
-                <>
-                  Mostrando{" "}
-                  {(pagination.currentPage - 1) * pagination.itemsPerPage + 1} a{" "}
-                  {Math.min(
-                    pagination.currentPage * pagination.itemsPerPage,
-                    pagination.totalItems,
-                  )}{" "}
-                  de {pagination.totalItems} alunos
-                </>
-              )}
+            <div className="mb-4 flex items-center justify-between text-sm text-white/70">
+              <div>
+                {search ? (
+                  <>
+                    Mostrando {alunos.length} resultado(s) de{" "}
+                    {pagination.totalItems} para {search}
+                  </>
+                ) : (
+                  <>
+                    Mostrando{" "}
+                    {(pagination.currentPage - 1) * pagination.itemsPerPage + 1}{" "}
+                    a{" "}
+                    {Math.min(
+                      pagination.currentPage * pagination.itemsPerPage,
+                      pagination.totalItems,
+                    )}{" "}
+                    de {pagination.totalItems} alunos
+                  </>
+                )}
+              </div>
+
+              {/* Page selector */}
+              <div className="flex items-center space-x-2">
+                <Label htmlFor="limit" className="text-sm font-medium">
+                  Mostrar:
+                </Label>
+                <Select
+                  value={String(limit)}
+                  onValueChange={(v) => updateLimit(Number(v))}
+                >
+                  <SelectTrigger className="w-20 rounded-[8px] border-white/40 shadow-[0]">
+                    <span>{limit}</span>
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="5">5</SelectItem>
+                    <SelectItem value="10">10</SelectItem>
+                    <SelectItem value="25">25</SelectItem>
+                    <SelectItem value="50">50</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           )}
-
-          {/* Updated AlunosTable with sorting */}
+          {/* AlunosTable */}
           <AlunosTable
             alunos={alunos}
             sortBy={sortBy}
@@ -176,77 +280,7 @@ export default function AlunosPage() {
           />
 
           {/* Pagination */}
-          {pagination && pagination.totalPages > 1 && (
-            <div className="mt-6 flex items-center justify-between rounded-[8px] border border-white/20 bg-[#151515] px-4 py-3">
-              <div className="flex flex-1 items-center justify-between">
-                <div>
-                  <p className="text-sm text-white/70">
-                    Página{" "}
-                    <span className="font-medium text-white">
-                      {pagination.currentPage}
-                    </span>{" "}
-                    de{" "}
-                    <span className="font-medium text-white">
-                      {pagination.totalPages}
-                    </span>
-                  </p>
-                </div>
-
-                <div className="flex items-center space-x-2">
-                  <button
-                    onClick={previousPage}
-                    disabled={!pagination.hasPreviousPage}
-                    className="relative inline-flex items-center rounded-md border border-white/20 bg-[#101010] px-4 py-2 text-sm font-medium text-white/70 hover:bg-white/5 disabled:cursor-not-allowed disabled:bg-[#101010] disabled:text-white/30"
-                  >
-                    Anterior
-                  </button>
-
-                  <div className="flex space-x-1">
-                    {Array.from(
-                      { length: Math.min(5, pagination.totalPages) },
-                      (_, i) => {
-                        let pageNum;
-                        if (pagination.totalPages <= 5) {
-                          pageNum = i + 1;
-                        } else if (pagination.currentPage <= 3) {
-                          pageNum = i + 1;
-                        } else if (
-                          pagination.currentPage >=
-                          pagination.totalPages - 2
-                        ) {
-                          pageNum = pagination.totalPages - 4 + i;
-                        } else {
-                          pageNum = pagination.currentPage - 2 + i;
-                        }
-
-                        return (
-                          <button
-                            key={pageNum}
-                            onClick={() => goToPage(pageNum)}
-                            className={`relative inline-flex items-center rounded-md border px-4 py-2 text-sm font-medium ${
-                              pageNum === pagination.currentPage
-                                ? "z-10 border-indigo-500 bg-indigo-500 text-white"
-                                : "border-white/20 bg-[#101010] text-white/70 hover:bg-white/5"
-                            }`}
-                          >
-                            {pageNum}
-                          </button>
-                        );
-                      },
-                    )}
-                  </div>
-
-                  <button
-                    onClick={nextPage}
-                    disabled={!pagination.hasNextPage}
-                    className="relative inline-flex items-center rounded-md border border-white/20 bg-[#101010] px-4 py-2 text-sm font-medium text-white/70 hover:bg-white/5 disabled:cursor-not-allowed disabled:bg-[#101010] disabled:text-white/30"
-                  >
-                    Próxima
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
+          {renderPagination()}
         </div>
       )}
     </div>

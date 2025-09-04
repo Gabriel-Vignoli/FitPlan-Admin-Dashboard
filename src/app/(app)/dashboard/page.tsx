@@ -13,16 +13,19 @@ export default async function DashboardPage() {
 
   return (
     <div className="p-8">
-      <Header
+      <div className="mb-10">
+        <Header
         buttonText="Adicionar Aluno"
         buttonVariant="default"
         title={`Bem-vindo ${admin.name}`}
         description="Descubra padrões, otimize treinos e acompanhe o fluxo da academia!"
         icon={<Plus />}
         pageLink="/alunos"
+        margin={5}
       />
-      
-      {/* Pass the work to client component */}
+      </div>
+
+      {/* Components */}
       <DashboardClient />
     </div>
   );

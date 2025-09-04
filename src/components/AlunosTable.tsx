@@ -29,15 +29,15 @@ interface Aluno {
 interface AlunosTableProps {
   alunos: Aluno[];
   sortBy?: string;
-  sortOrder?: 'asc' | 'desc';
+  sortOrder?: "asc" | "desc";
   onSortChange?: (field: string) => void;
   getSortIcon?: (field: string) => React.ReactNode;
 }
 
-export default function AlunosTable({ 
-  alunos,  
-  onSortChange, 
-  getSortIcon 
+export default function AlunosTable({
+  alunos,
+  onSortChange,
+  getSortIcon,
 }: AlunosTableProps) {
   const router = useRouter();
 
@@ -66,33 +66,33 @@ export default function AlunosTable({
         <Table className="rounded-[8px] border border-white/20">
           <TableHeader className="bg-[#101010] text-white/70">
             <TableRow className="border-white/10 hover:bg-white/5">
-              <TableHead 
-                className={`text-white/70 ${onSortChange ? 'cursor-pointer hover:text-white' : ''}`}
-                onClick={() => handleSort('name')}
+              <TableHead
+                className={`text-white/70 ${onSortChange ? "cursor-pointer hover:text-white" : ""}`}
+                onClick={() => handleSort("name")}
               >
                 <div className="flex items-center space-x-1">
                   <span>NOME</span>
-                  {getSortIcon && <span>{getSortIcon('name')}</span>}
+                  {getSortIcon && <span>{getSortIcon("name")}</span>}
                 </div>
               </TableHead>
               <TableHead className="text-white/70">CELULAR</TableHead>
               <TableHead className="text-white/70">PLANO</TableHead>
-              <TableHead 
-                className={`text-white/70 ${onSortChange ? 'cursor-pointer hover:text-white' : ''}`}
-                onClick={() => handleSort('createdAt')}
+              <TableHead
+                className={`text-white/70 ${onSortChange ? "cursor-pointer hover:text-white" : ""}`}
+                onClick={() => handleSort("createdAt")}
               >
                 <div className="flex items-center space-x-1">
                   <span>DESDE</span>
-                  {getSortIcon && <span>{getSortIcon('createdAt')}</span>}
+                  {getSortIcon && <span>{getSortIcon("createdAt")}</span>}
                 </div>
               </TableHead>
-              <TableHead 
-                className={`text-white/70 ${onSortChange ? 'cursor-pointer hover:text-white' : ''}`}
-                onClick={() => handleSort('paymentStatus')}
+              <TableHead
+                className={`text-white/70 ${onSortChange ? "cursor-pointer hover:text-white" : ""}`}
+                onClick={() => handleSort("paymentStatus")}
               >
                 <div className="flex items-center space-x-1">
                   <span>STATUS</span>
-                  {getSortIcon && <span>{getSortIcon('paymentStatus')}</span>}
+                  {getSortIcon && <span>{getSortIcon("paymentStatus")}</span>}
                 </div>
               </TableHead>
               <TableHead className="text-white/70">GERENCIAR</TableHead>
@@ -129,8 +129,8 @@ export default function AlunosTable({
                   </span>
                 </TableCell>
                 <TableCell>
-                  <button 
-                    className="cursor-pointer text-blue-400 transition-colors hover:text-blue-300 hover:underline" 
+                  <button
+                    className="cursor-pointer text-blue-400 transition-colors hover:text-blue-300 hover:underline"
                     onClick={() => handleNavigateToAluno(aluno.id)}
                   >
                     Gerenciar
@@ -178,7 +178,7 @@ export default function AlunosTable({
                 <span className="text-white/50">Desde: </span>
                 {formatDate(aluno.createdAt)}
               </div>
-              <button 
+              <button
                 className="cursor-pointer font-medium text-blue-400 transition-colors hover:text-blue-300"
                 onClick={() => handleNavigateToAluno(aluno.id)}
               >

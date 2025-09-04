@@ -12,7 +12,7 @@ interface Student {
 interface StudentSearchProps {
   onStudentSelect?: (student: Student) => void;
   onSearchResults?: (students: Student[]) => void;
-  onSearchChange?: (query: string) => void; // Nova prop
+  onSearchChange?: (query: string) => void; 
   placeholder?: string;
 }
 
