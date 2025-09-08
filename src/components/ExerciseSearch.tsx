@@ -10,13 +10,15 @@ interface Exercise {
 interface ExerciseSearchProps {
   onExerciseSelect?: (exercise: Exercise) => void;
   onSearchResults?: (exercises: Exercise[]) => void;
+  onChange?: (query: string) => void;
   placeholder?: string;
 }
-
-export default function ExerciseSearch({
-  onSearchResults,
-  placeholder = "Buscar exercicio por nome...",
-}: ExerciseSearchProps) {
+export default function ExerciseSearch(props: ExerciseSearchProps) {
+  const {
+    onSearchResults,
+    onChange,
+    placeholder = "Buscar exercicio por nome...",
+  } = props;
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -24,12 +26,13 @@ export default function ExerciseSearch({
   useEffect(() => {
     const timeoutId = setTimeout(() => {
       if (searchQuery.length >= 2) {
+        if (onChange) onChange(searchQuery);
         searchExercises();
       } else {
         onSearchResults?.([]);
+        if (onChange) onChange("");
       }
-    }, 300);
-
+    }, 500);
     return () => clearTimeout(timeoutId);
   }, [searchQuery]);
 
@@ -43,13 +46,8 @@ export default function ExerciseSearch({
       const response = await fetch(
         `/api/exercises?q=${encodeURIComponent(searchQuery)}`,
       );
-
-      if (!response.ok) {
-        throw new Error("Erro ao buscar alunos");
-      }
-
       const data = await response.json();
-      onSearchResults?.(data);
+      onSearchResults?.(data?.data?.exercises || []);
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : "Erro desconhecido";
@@ -67,7 +65,6 @@ export default function ExerciseSearch({
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setSearchQuery(value);
-
     if (value.length === 0) {
       onSearchResults?.([]);
     }
@@ -76,7 +73,7 @@ export default function ExerciseSearch({
   return (
     <div className="relative">
       <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-        <Search className="h-4 w-4 text-white/50"></Search>
+        <Search className="h-4 w-4 text-white/50" />
       </div>
 
       <input

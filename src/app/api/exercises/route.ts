@@ -8,31 +8,57 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const searchQuery = searchParams.get("q");
+    const page = parseInt(searchParams.get("page") || "1");
+    const limit = parseInt(searchParams.get("limit") || "10");
+    const sortBy = searchParams.get("sortBy") || "createdAt";
+    const sortOrder = searchParams.get("sortOrder") || "desc";
+    const skip = (page - 1) * limit;
 
-    if (searchQuery && searchQuery.length >= 2) {
-      const exercises = await prisma.exercise.findMany({
-        where: {
-          name: {
-            contains: searchQuery,
-            mode: "insensitive",
-          },
-        },
+    const whereClause =
+      searchQuery && searchQuery.length >= 2
+        ? {
+            name: {
+              contains: searchQuery,
+              mode: "insensitive" as const,
+            },
+          }
+        : {};
+
+    const [exercises, totalCount] = await Promise.all([
+      prisma.exercise.findMany({
+        where: whereClause,
+        skip,
+        take: limit,
         orderBy: {
-          name: "asc",
+          [sortBy]: sortOrder as "asc" | "desc",
         },
-        take: 15,
-      });
+      }),
+      prisma.exercise.count({ where: whereClause }),
+    ]);
 
-      return NextResponse.json(exercises);
-    }
+    const totalPages = Math.ceil(totalCount / limit);
+    const hasNextPage = page < totalPages;
+    const hasPreviousPage = page > 1;
 
-    const exercises = await prisma.exercise.findMany({
-      orderBy: {
-        name: "asc",
+    return NextResponse.json({
+      success: true,
+      data: {
+        exercises,
+        pagination: {
+          currentPage: page,
+          totalPages,
+          totalItems: totalCount,
+          itemsPerPage: limit,
+          hasNextPage,
+          hasPreviousPage,
+        },
+        query: {
+          search: searchQuery || "",
+          sortBy,
+          sortOrder,
+        },
       },
     });
-
-    return NextResponse.json(exercises);
   } catch (error) {
     console.log("Error fetching exercises", error);
     return NextResponse.json(
