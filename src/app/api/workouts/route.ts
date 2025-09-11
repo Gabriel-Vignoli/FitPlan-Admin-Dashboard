@@ -18,45 +18,67 @@ interface CreateWorkoutRequest {
 
 export async function GET(request: NextRequest) {
   try {
-const { searchParams } = new URL(request.url)
-const searchQuery = searchParams.get("q")
+    const { searchParams } = new URL(request.url);
+    const searchQuery = searchParams.get("q");
+    const page = parseInt(searchParams.get("page") || "1");
+    const limit = parseInt(searchParams.get("limit") || "10");
+    const sortBy = searchParams.get("sortBy") || "createdAt";
+    const sortOrder = searchParams.get("sortOrder") || "desc";
+    const skip = (page - 1) * limit;
 
-if (searchQuery && searchQuery.length >=2) {
-  const workouts = await prisma.workout.findMany({
-    where: {
-      title: {
-        contains: searchQuery,
-        mode: "insensitive"
-      }
-    },
-    include: {
-      exercises: {
-        include: {
-          exercise: true
+    const whereClause =
+      searchQuery && searchQuery.length >= 2
+        ? {
+            title: {
+              contains: searchQuery,
+              mode: "insensitive" as const,
+            },
+          }
+        : {};
+
+    const [workouts, totalCount] = await Promise.all([
+      prisma.workout.findMany({
+        where: whereClause,
+        skip,
+        take: limit,
+        orderBy: {
+          [sortBy]: sortOrder as "asc" | "desc",
         },
-        orderBy: { order: "asc" }
-      }
-    },
-    orderBy: { createdAt: "desc" },
-    take: 10
-  })
-
-  return NextResponse.json(workouts);
-}
-
-    const workouts = await prisma.workout.findMany({
-      include: {
-        exercises: {
-          include: {
-            exercise: true,
+        include: {
+          exercises: {
+            include: {
+              exercise: true,
+            },
+            orderBy: { order: "asc" },
           },
-          orderBy: { order: "asc" },
+        },
+      }),
+      prisma.workout.count({ where: whereClause }),
+    ]);
+
+    const totalPages = Math.ceil(totalCount / limit);
+    const hasNextPage = page < totalPages;
+    const hasPreviousPage = page > 1;
+
+    return NextResponse.json({
+      success: true,
+      data: {
+        workouts,
+        pagination: {
+          currentPage: page,
+          totalPages,
+          totalItems: totalCount,
+          itemsPerPage: limit,
+          hasNextPage,
+          hasPreviousPage,
+        },
+        query: {
+          search: searchQuery || "",
+          sortBy,
+          sortOrder,
         },
       },
-      orderBy: { createdAt: "desc" },
     });
-
-    return NextResponse.json(workouts);
   } catch (error) {
     console.error("Error fetching workouts:", error);
     return NextResponse.json(
@@ -68,52 +90,61 @@ if (searchQuery && searchQuery.length >=2) {
 
 export async function POST(request: NextRequest) {
   try {
-    const body: CreateWorkoutRequest = await request.json()
-    const { title, description, exercisesId } = body
+    const body: CreateWorkoutRequest = await request.json();
+    const { title, description, exercisesId } = body;
 
     if (!title || !description) {
       return NextResponse.json(
-        { error: "Título e descrição são obrigatórios"},
-        { status: 400 }
-      )
+        { error: "Título e descrição são obrigatórios" },
+        { status: 400 },
+      );
     }
 
-    if (exercisesId && (!Array.isArray(exercisesId) || exercisesId.length < 1)) {
-       return NextResponse.json(
-        { error: "Você precisa adicionar pelo menos um exercicio no seu treino"},
-        { status: 400 }
-      )
+    if (
+      exercisesId &&
+      (!Array.isArray(exercisesId) || exercisesId.length < 1)
+    ) {
+      return NextResponse.json(
+        {
+          error: "Você precisa adicionar pelo menos um exercicio no seu treino",
+        },
+        { status: 400 },
+      );
     }
 
     const newWorkout = await prisma.workout.create({
       data: {
         title,
         description,
-        exercises: exercisesId && exercisesId.length > 0 ? {
-          create: exercisesId.map((exerciseData: ExerciseData, index: number) => ({
-            exerciseId: exerciseData.exerciseId,
-            sets: exerciseData.sets,
-            reps: exerciseData.reps,
-            weight: exerciseData.weight,
-            rest: exerciseData.rest,
-            notes: exerciseData.notes,
-            order: index + 1,
-          }))
-        } : undefined
+        exercises:
+          exercisesId && exercisesId.length > 0
+            ? {
+                create: exercisesId.map(
+                  (exerciseData: ExerciseData, index: number) => ({
+                    exerciseId: exerciseData.exerciseId,
+                    sets: exerciseData.sets,
+                    reps: exerciseData.reps,
+                    weight: exerciseData.weight,
+                    rest: exerciseData.rest,
+                    notes: exerciseData.notes,
+                    order: index + 1,
+                  }),
+                ),
+              }
+            : undefined,
       },
       include: {
         exercises: {
           include: {
-            exercise: true
+            exercise: true,
           },
-          orderBy: { order: "asc"}
-        }
-      }
-    })
+          orderBy: { order: "asc" },
+        },
+      },
+    });
 
     return NextResponse.json(newWorkout, { status: 201 });
-  }
-  catch (error) {
+  } catch (error) {
     console.error("Error creating workout:", error);
     return NextResponse.json(
       { error: "Erro interno do servidor" },

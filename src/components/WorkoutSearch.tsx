@@ -35,11 +35,13 @@ interface Workout {
 interface WorkoutSearchProps {
   onWorkoutSelect?: (workout: Workout) => void;
   onSearchResults?: (workouts: Workout[]) => void;
+  onChange?: (query: string) => void;
   placeholder?: string;
 }
 
 export default function WorkoutSearch({
   onSearchResults,
+  onChange,
   placeholder = "Buscar treino por nome...",
 }: WorkoutSearchProps) {
   const [searchQuery, setSearchQuery] = useState("");
@@ -49,12 +51,14 @@ export default function WorkoutSearch({
   useEffect(() => {
     const timeoutId = setTimeout(() => {
       if (searchQuery.length >= 2) {
+        if (onChange) onChange(searchQuery);
         searchStudents();
       } else {
         onSearchResults?.([]);
+        if (onChange) onChange("");
       }
-      return () => clearTimeout(timeoutId);
     }, 300);
+    return () => clearTimeout(timeoutId);
   }, [searchQuery]);
 
   const searchStudents = async () => {
@@ -122,15 +126,15 @@ export default function WorkoutSearch({
       {loading && (
         <div className="absolute top-full right-0 left-0 z-10 mt-1 rounded-[8px] bg-[#151515] p-3">
           <div className="flex items-center gap-2 text-white/70">
-           <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white/70"></div>
+            <div className="h-4 w-4 animate-spin rounded-full border-b-2 border-white/70"></div>
             <span>Buscando treinos...</span>
           </div>
         </div>
       )}
 
       {error && (
-        <div className="absolute top-full left-0 right-0 mt-1 rounded-[8px] border border-red-500/30 bg-red-500/10 p-3 z-10">
-          <p className="text-red-400 text-sm">{error}</p>
+        <div className="absolute top-full right-0 left-0 z-10 mt-1 rounded-[8px] border border-red-500/30 bg-red-500/10 p-3">
+          <p className="text-sm text-red-400">{error}</p>
         </div>
       )}
     </div>

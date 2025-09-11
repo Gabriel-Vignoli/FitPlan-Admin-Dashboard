@@ -49,7 +49,7 @@ interface Workout {
   id: string;
   title: string;
   description: string;
-  isFavorite: boolean;
+  isFavorite?: boolean;
   exercises: WorkoutExercise[];
 }
 
@@ -86,7 +86,7 @@ export default function EditWorkoutDialog({
         title: workout.title,
         description: workout.description,
       });
-      
+
       // Initialize selected exercises from the existing workout
       const workoutExercises = workout.exercises.map((workoutExercise) => ({
         exerciseId: workoutExercise.exerciseId,
@@ -97,7 +97,7 @@ export default function EditWorkoutDialog({
         rest: workoutExercise.rest || "",
         notes: workoutExercise.notes || "",
       }));
-      
+
       setSelectedExercises(workoutExercises);
     }
   }, [open, workout]);
@@ -113,8 +113,14 @@ export default function EditWorkoutDialog({
     try {
       const response = await fetch("/api/exercises");
       if (response.ok) {
-        const exercises = await response.json();
-        setAvailableExercises(exercises);
+        const data = await response.json();
+        if (Array.isArray(data)) {
+          setAvailableExercises(data);
+        } else if (data && data.data && Array.isArray(data.data.exercises)) {
+          setAvailableExercises(data.data.exercises);
+        } else {
+          setAvailableExercises([]);
+        }
       }
     } catch (error) {
       console.error("Error fetching exercises:", error);
@@ -150,17 +156,19 @@ export default function EditWorkoutDialog({
 
   const removeExercise = (exerciseId: string) => {
     setSelectedExercises(
-        selectedExercises.filter((e) => e.exerciseId !== exerciseId)
+      selectedExercises.filter((e) => e.exerciseId !== exerciseId),
     );
   };
 
   const updateExercise = (
     exerciseId: string,
     field: keyof WorkoutExerciseData,
-    value: string | number
+    value: string | number,
   ) => {
     setSelectedExercises(
-        selectedExercises.map((e) => e.exerciseId === exerciseId ? { ...e, [field]: value } : e)
+      selectedExercises.map((e) =>
+        e.exerciseId === exerciseId ? { ...e, [field]: value } : e,
+      ),
     );
   };
 
@@ -168,37 +176,37 @@ export default function EditWorkoutDialog({
     e.preventDefault();
     setLoading(true);
     try {
-        const response = await fetch(`/api/workouts/${workout.id}`, {
-            method: "PUT",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                title: formData.title,
-                description: formData.description,
-                exercises: selectedExercises.map(exercise => ({
-                    exerciseId: exercise.exerciseId,
-                    sets: exercise.sets,
-                    reps: exercise.reps,
-                    weight: exercise.weight,
-                    rest: exercise.rest,
-                    notes: exercise.notes
-                }))
-            })
-        });
+      const response = await fetch(`/api/workouts/${workout.id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          title: formData.title,
+          description: formData.description,
+          exercises: selectedExercises.map((exercise) => ({
+            exerciseId: exercise.exerciseId,
+            sets: exercise.sets,
+            reps: exercise.reps,
+            weight: exercise.weight,
+            rest: exercise.rest,
+            notes: exercise.notes,
+          })),
+        }),
+      });
 
-        if (!response.ok) {
-            throw new Error("Failed to update workout");
-        }
+      if (!response.ok) {
+        throw new Error("Failed to update workout");
+      }
 
-        const updatedWorkout = await response.json();
+      const updatedWorkout = await response.json();
 
-        if (updatedWorkout && updatedWorkout.id) {
-          onWorkoutUpdated(updatedWorkout);
-          setOpen(false);
-        } else {
-          console.error("Invalid workout data received:", updatedWorkout);
-        }
+      if (updatedWorkout && updatedWorkout.id) {
+        onWorkoutUpdated(updatedWorkout);
+        setOpen(false);
+      } else {
+        console.error("Invalid workout data received:", updatedWorkout);
+      }
     } catch (error) {
       console.error("Error updating workout", error);
     } finally {
@@ -211,16 +219,16 @@ export default function EditWorkoutDialog({
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
-        ...prev,
-        [name]: value
+      ...prev,
+      [name]: value,
     }));
   };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <button className="p-2 bg-white/10 hover:bg-blue-500/30 text-white/70 hover:text-blue-500 transition-colors rounded-[4px]">
-          <Edit className="w-4 h-4" />
+        <button className="rounded-[4px] bg-white/10 p-2 text-white/70 transition-colors hover:bg-blue-500/30 hover:text-blue-500">
+          <Edit className="h-4 w-4" />
         </button>
       </DialogTrigger>
       <DialogContent className="max-h-[80vh] overflow-y-auto rounded-[8px] bg-gradient-to-br from-black to-[#101010] sm:max-w-[600px]">

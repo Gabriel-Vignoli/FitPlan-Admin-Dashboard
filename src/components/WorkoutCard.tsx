@@ -29,7 +29,7 @@ interface Workout {
   id: string;
   title: string;
   description: string;
-  isFavorite: boolean;
+  isFavorite?: boolean;
   exercises: WorkoutExercise[];
 }
 
@@ -39,7 +39,11 @@ interface WorkoutProps {
   onWorkoutDeleted: (id: string) => void;
 }
 
-export default function WorkoutCard({ workout, onWorkoutUpdated, onWorkoutDeleted }: WorkoutProps) {
+export default function WorkoutCard({
+  workout,
+  onWorkoutUpdated,
+  onWorkoutDeleted,
+}: WorkoutProps) {
   const totalSets = workout.exercises.reduce(
     (sum, exercise) => sum + exercise.sets,
     0,
@@ -59,8 +63,17 @@ export default function WorkoutCard({ workout, onWorkoutUpdated, onWorkoutDelete
           </p>
         </div>
         <div className="flex gap-2">
-          <EditWorkoutDialog onWorkoutUpdated={onWorkoutUpdated} workout={workout}></EditWorkoutDialog>
-          <DeleteButton endpoint="/api/workouts" id={workout.id} itemName="Treino" onDeleted={onWorkoutDeleted} variant="default"></DeleteButton>
+          <EditWorkoutDialog
+            onWorkoutUpdated={onWorkoutUpdated}
+            workout={workout}
+          ></EditWorkoutDialog>
+          <DeleteButton
+            endpoint="/api/workouts"
+            id={workout.id}
+            itemName="Treino"
+            onDeleted={onWorkoutDeleted}
+            variant="default"
+          ></DeleteButton>
         </div>
       </div>
 
