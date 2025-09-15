@@ -36,6 +36,7 @@ export async function GET(request: NextRequest) {
             id: true,
             name: true,
             phone: true,
+            avatar: true,
             createdAt: true,
             paymentStatus: true,
             plan: {
@@ -90,6 +91,7 @@ export async function GET(request: NextRequest) {
           id: true,
           name: true,
           phone: true,
+          avatar: true,
           createdAt: true,
           paymentStatus: true,
           plan: {

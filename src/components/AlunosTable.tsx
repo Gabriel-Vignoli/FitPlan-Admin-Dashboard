@@ -14,6 +14,7 @@ import {
   getStatusText,
 } from "@/lib/utils/formatters";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 interface Aluno {
   id: string;
@@ -21,6 +22,7 @@ interface Aluno {
   phone: string;
   createdAt: string;
   paymentStatus: string;
+  avatar?: string;
   plan: {
     name: string;
   };
@@ -106,9 +108,21 @@ export default function AlunosTable({
               >
                 <TableCell className="font-medium">
                   <div className="flex items-center gap-3">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-500 text-sm font-medium text-white">
-                      {getInitials(aluno.name)}
-                    </div>
+                    {aluno.avatar ? (
+                      <div className="relative h-8 w-8 overflow-hidden rounded-full">
+                        <Image
+                          src={aluno.avatar}
+                          alt={aluno.name}
+                          width={32}
+                          height={32}
+                          className="rounded-full object-cover"
+                        />
+                      </div>
+                    ) : (
+                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-500 text-sm font-medium text-white">
+                        {getInitials(aluno.name)}
+                      </div>
+                    )}
                     <span className="text-white">{aluno.name}</span>
                   </div>
                 </TableCell>

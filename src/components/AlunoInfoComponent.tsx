@@ -1,4 +1,5 @@
 import React from "react";
+import Image from "next/image";
 import {
   User,
   Mail,
@@ -37,6 +38,7 @@ interface Student {
   planId: string;
   paymentStatus: string;
   createdAt: string;
+  avatar?: string;
 }
 
 interface Plan {
@@ -65,11 +67,23 @@ const StudentInfoComponent: React.FC<StudentInfoProps> = ({
       {/* Header Section */}
       <div className="mb-8 flex flex-col items-center gap-6 md:flex-row md:items-start">
         <div className="relative">
-          <div className="flex h-32 w-32 items-center justify-center rounded-full border-4 border-gray-200 bg-indigo-600">
-            <span className="text-3xl font-bold text-white">
-              {getInitials(student.name)}
-            </span>
-          </div>
+          {student.avatar ? (
+            <div className="flex h-32 w-32 items-center justify-center rounded-full border-4 border-gray-200 bg-indigo-600 overflow-hidden">
+              <Image
+                src={student.avatar}
+                alt={student.name}
+                width={128}
+                height={128}
+                className="rounded-full object-cover"
+              />
+            </div>
+          ) : (
+            <div className="flex h-32 w-32 items-center justify-center rounded-full border-4 border-gray-200 bg-indigo-600">
+              <span className="text-3xl font-bold text-white">
+                {getInitials(student.name)}
+              </span>
+            </div>
+          )}
         </div>
 
         <div className="flex-1 text-center md:text-left">
