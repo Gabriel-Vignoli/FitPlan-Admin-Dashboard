@@ -85,8 +85,14 @@ export default function CreateWorkoutDialog({
     try {
       const response = await fetch("/api/exercises");
       if (response.ok) {
-        const exercises = await response.json();
-        setAvailableExercises(exercises);
+        const data = await response.json();
+        if (Array.isArray(data)) {
+          setAvailableExercises(data);
+        } else if (data && data.data && Array.isArray(data.data.exercises)) {
+          setAvailableExercises(data.data.exercises);
+        } else {
+          setAvailableExercises([]);
+        }
       }
     } catch (error) {
       console.error("Error fetching exercises:", error);
