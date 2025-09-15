@@ -102,12 +102,15 @@ export default function AddWorkoutToAlunoDialog({
         throw new Error(`Erro ao carregar treinos: ${response.status}`);
       }
       const data = await response.json();
-
-      if (!Array.isArray(data)) {
+      let workouts: Workout[] = [];
+      if (Array.isArray(data)) {
+        workouts = data;
+      } else if (data && data.data && Array.isArray(data.data.workouts)) {
+        workouts = data.data.workouts;
+      } else {
         throw new Error("Formato de dados inválido recebido do servidor");
       }
-
-      setAvailableWorkouts(data);
+      setAvailableWorkouts(workouts);
     } catch (error) {
       console.error("Error fetching workouts:", error);
       const errorMessage =
