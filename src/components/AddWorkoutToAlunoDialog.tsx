@@ -289,24 +289,57 @@ export default function AddWorkoutToAlunoDialog({
 
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="dayOfWeek">
-                Dia da Semana
-              </Label>
+              <Label htmlFor="dayOfWeek">Dia da Semana</Label>
               <Select
                 value={formData.dayOfWeek}
                 onValueChange={handleDayChange}
               >
-                <SelectTrigger className="rounded-[8px] border-white/40 w-full">
+                <SelectTrigger className="w-full rounded-[8px] border-white/40">
                   <SelectValue placeholder="Selecione um dia" />
                 </SelectTrigger>
-                <SelectContent className="bg-black border-white/20">
-                  <SelectItem value="Segunda" className="text-white hover:bg-white/10">Segunda</SelectItem>
-                  <SelectItem value="Terça" className="text-white hover:bg-white/10">Terça</SelectItem>
-                  <SelectItem value="Quarta" className="text-white hover:bg-white/10">Quarta</SelectItem>
-                  <SelectItem value="Quinta" className="text-white hover:bg-white/10">Quinta</SelectItem>
-                  <SelectItem value="Sexta" className="text-white hover:bg-white/10">Sexta</SelectItem>
-                  <SelectItem value="Sabado" className="text-white hover:bg-white/10">Sábado</SelectItem>
-                  <SelectItem value="Domingo" className="text-white hover:bg-white/10">Domingo</SelectItem>
+                <SelectContent className="border-white/20 bg-black">
+                  <SelectItem
+                    value="Segunda"
+                    className="text-white hover:bg-white/10"
+                  >
+                    Segunda
+                  </SelectItem>
+                  <SelectItem
+                    value="Terça"
+                    className="text-white hover:bg-white/10"
+                  >
+                    Terça
+                  </SelectItem>
+                  <SelectItem
+                    value="Quarta"
+                    className="text-white hover:bg-white/10"
+                  >
+                    Quarta
+                  </SelectItem>
+                  <SelectItem
+                    value="Quinta"
+                    className="text-white hover:bg-white/10"
+                  >
+                    Quinta
+                  </SelectItem>
+                  <SelectItem
+                    value="Sexta"
+                    className="text-white hover:bg-white/10"
+                  >
+                    Sexta
+                  </SelectItem>
+                  <SelectItem
+                    value="Sabado"
+                    className="text-white hover:bg-white/10"
+                  >
+                    Sábado
+                  </SelectItem>
+                  <SelectItem
+                    value="Domingo"
+                    className="text-white hover:bg-white/10"
+                  >
+                    Domingo
+                  </SelectItem>
                 </SelectContent>
               </Select>
               <p id="dayOfWeek-help" className="text-xs text-white/70">
