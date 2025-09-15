@@ -70,7 +70,16 @@ interface EditStudentWorkoutDialogProps {
 
 // Helper function to convert number to day name
 const formatNumberToDay = (dayNumber: number): string => {
-  const days = ["", "Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sabado", "Domingo"];
+  const days = [
+    "",
+    "Segunda",
+    "Terça",
+    "Quarta",
+    "Quinta",
+    "Sexta",
+    "Sabado",
+    "Domingo",
+  ];
   return days[dayNumber] || "";
 };
 
@@ -96,7 +105,7 @@ export default function EditStudentWorkoutDialog({
   useEffect(() => {
     if (open) {
       setFormData({
-        dayOfWeek: formatNumberToDay(studentWorkout.dayOfWeek)
+        dayOfWeek: formatNumberToDay(studentWorkout.dayOfWeek),
       });
       setSelectedWorkout(studentWorkout.workout);
       setError(null);
@@ -117,12 +126,15 @@ export default function EditStudentWorkoutDialog({
         throw new Error(`Erro ao carregar treinos: ${response.status}`);
       }
       const data = await response.json();
-
-      if (!Array.isArray(data)) {
+      let workouts: Workout[] = [];
+      if (Array.isArray(data)) {
+        workouts = data;
+      } else if (data && data.data && Array.isArray(data.data.workouts)) {
+        workouts = data.data.workouts;
+      } else {
         throw new Error("Formato de dados inválido recebido do servidor");
       }
-
-      setAvailableWorkouts(data);
+      setAvailableWorkouts(workouts);
     } catch (error) {
       console.error("Error fetching workouts:", error);
       const errorMessage =
@@ -196,16 +208,19 @@ export default function EditStudentWorkoutDialog({
     setLoading(true);
 
     try {
-      const response = await fetch(`/api/alunos/${studentWorkout.studentId}/workouts/${studentWorkout.id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
+      const response = await fetch(
+        `/api/alunos/${studentWorkout.studentId}/workouts/${studentWorkout.id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            dayOfWeek: dayOfWeekNumber,
+            workoutId: selectedWorkout?.id,
+          }),
         },
-        body: JSON.stringify({
-          dayOfWeek: dayOfWeekNumber,
-          workoutId: selectedWorkout?.id,
-        }),
-      });
+      );
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
@@ -249,8 +264,8 @@ export default function EditStudentWorkoutDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <button className="p-2 bg-white/10 hover:bg-blue-500/30 text-white/70 hover:text-blue-500 transition-colors rounded-[4px]">
-          <Edit className="w-4 h-4" />
+        <button className="rounded-[4px] bg-white/10 p-2 text-white/70 transition-colors hover:bg-blue-500/30 hover:text-blue-500">
+          <Edit className="h-4 w-4" />
         </button>
       </DialogTrigger>
       <DialogContent className="max-h-[80vh] overflow-y-auto rounded-[8px] bg-gradient-to-br from-black to-[#101010] sm:max-w-[600px]">
@@ -274,24 +289,57 @@ export default function EditStudentWorkoutDialog({
 
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="dayOfWeek">
-                Dia da Semana
-              </Label>
+              <Label htmlFor="dayOfWeek">Dia da Semana</Label>
               <Select
                 value={formData.dayOfWeek}
                 onValueChange={handleDayChange}
               >
-                <SelectTrigger className="rounded-[8px] border-white/40 w-full">
+                <SelectTrigger className="w-full rounded-[8px] border-white/40">
                   <SelectValue placeholder="Selecione um dia" />
                 </SelectTrigger>
-                <SelectContent className="bg-black border-white/20">
-                  <SelectItem value="Segunda" className="text-white hover:bg-white/10">Segunda</SelectItem>
-                  <SelectItem value="Terça" className="text-white hover:bg-white/10">Terça</SelectItem>
-                  <SelectItem value="Quarta" className="text-white hover:bg-white/10">Quarta</SelectItem>
-                  <SelectItem value="Quinta" className="text-white hover:bg-white/10">Quinta</SelectItem>
-                  <SelectItem value="Sexta" className="text-white hover:bg-white/10">Sexta</SelectItem>
-                  <SelectItem value="Sabado" className="text-white hover:bg-white/10">Sábado</SelectItem>
-                  <SelectItem value="Domingo" className="text-white hover:bg-white/10">Domingo</SelectItem>
+                <SelectContent className="border-white/20 bg-black">
+                  <SelectItem
+                    value="Segunda"
+                    className="text-white hover:bg-white/10"
+                  >
+                    Segunda
+                  </SelectItem>
+                  <SelectItem
+                    value="Terça"
+                    className="text-white hover:bg-white/10"
+                  >
+                    Terça
+                  </SelectItem>
+                  <SelectItem
+                    value="Quarta"
+                    className="text-white hover:bg-white/10"
+                  >
+                    Quarta
+                  </SelectItem>
+                  <SelectItem
+                    value="Quinta"
+                    className="text-white hover:bg-white/10"
+                  >
+                    Quinta
+                  </SelectItem>
+                  <SelectItem
+                    value="Sexta"
+                    className="text-white hover:bg-white/10"
+                  >
+                    Sexta
+                  </SelectItem>
+                  <SelectItem
+                    value="Sabado"
+                    className="text-white hover:bg-white/10"
+                  >
+                    Sábado
+                  </SelectItem>
+                  <SelectItem
+                    value="Domingo"
+                    className="text-white hover:bg-white/10"
+                  >
+                    Domingo
+                  </SelectItem>
                 </SelectContent>
               </Select>
               <p id="dayOfWeek-help" className="text-xs text-white/70">
