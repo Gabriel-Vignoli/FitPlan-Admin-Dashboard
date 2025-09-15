@@ -50,6 +50,7 @@ model Student {
   height      Float?
   weight      Float?
   bodyFat     Float?
+  avatar      String?
   isActive    Boolean     @default(true)
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
