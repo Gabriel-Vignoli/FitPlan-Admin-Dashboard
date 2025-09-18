@@ -4,6 +4,11 @@ const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
       {
+        protocol: "https",
+        hostname: "meuappfitplan.s3.sa-east-1.amazonaws.com",
+        pathname: "/uploads/**",
+      },
+      {
         protocol: "http",
         hostname: "192.168.3.10",
         port: "3000",

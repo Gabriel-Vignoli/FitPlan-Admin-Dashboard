@@ -1,8 +1,8 @@
 import { prisma } from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
-import { writeFile, mkdir } from "fs/promises";
-import path from "path";
-import { existsSync } from "fs";
+import s3Client from "../../../../config/aws";
+import { PutObjectCommand } from "@aws-sdk/client-s3";
+import { v4 as uuidv4 } from "uuid";
 
 export async function GET(request: NextRequest) {
   try {
@@ -87,58 +87,44 @@ export async function POST(request: NextRequest) {
     let imageUrl = "";
     let videoUrl = "";
 
-    // Handle image upload
-    if (imageFile) {
-      const imageBytes = await imageFile.arrayBuffer();
-      const imageBuffer = Buffer.from(imageBytes);
-
-      // Generate unique filename
-      const imageExtension = path.extname(imageFile.name);
-      const imageFileName = `${Date.now()}-${Math.random().toString(36).substring(2)}${imageExtension}`;
-
-      // Create uploads/images directory if it doesn't exist
-      const uploadsDir = path.join(process.cwd(), "public", "uploads");
-      const imagesDir = path.join(uploadsDir, "images");
-
-      if (!existsSync(uploadsDir)) {
-        await mkdir(uploadsDir, { recursive: true });
-      }
-      if (!existsSync(imagesDir)) {
-        await mkdir(imagesDir, { recursive: true });
-      }
-
-      // Save to public/uploads/images directory
-      const imagePath = path.join(imagesDir, imageFileName);
-      await writeFile(imagePath, imageBuffer);
-
-      imageUrl = `/uploads/images/${imageFileName}`;
+    // Helper to convert File to Uint8Array
+    async function fileToUint8Array(file: File): Promise<Uint8Array> {
+      const arrayBuffer = await file.arrayBuffer();
+      return new Uint8Array(arrayBuffer);
     }
 
-    // Handle video upload
+    // Handle image upload to S3
+    if (imageFile) {
+      const imageExtension = imageFile.name.split(".").pop();
+      const imageFileName = `${Date.now()}-${uuidv4()}.${imageExtension}`;
+      const imageBody = await fileToUint8Array(imageFile);
+
+      const uploadParams = {
+        Bucket: process.env.AWS_BUCKET_NAME!,
+        Key: `uploads/${imageFileName}`,
+        Body: imageBody,
+        ContentType: imageFile.type ?? undefined,
+      };
+      const command = new PutObjectCommand(uploadParams);
+      await s3Client.send(command);
+      imageUrl = `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/uploads/${imageFileName}`;
+    }
+
+    // Handle video upload to S3
     if (videoFile) {
-      const videoBytes = await videoFile.arrayBuffer();
-      const videoBuffer = Buffer.from(videoBytes);
+      const videoExtension = videoFile.name.split(".").pop();
+      const videoFileName = `${Date.now()}-${uuidv4()}.${videoExtension}`;
+      const videoBody = await fileToUint8Array(videoFile);
 
-      // Generate unique filename
-      const videoExtension = path.extname(videoFile.name);
-      const videoFileName = `${Date.now()}-${Math.random().toString(36).substring(2)}${videoExtension}`;
-
-      // Create uploads/videos directory if it doesn't exist
-      const uploadsDir = path.join(process.cwd(), "public", "uploads");
-      const videosDir = path.join(uploadsDir, "videos");
-
-      if (!existsSync(uploadsDir)) {
-        await mkdir(uploadsDir, { recursive: true });
-      }
-      if (!existsSync(videosDir)) {
-        await mkdir(videosDir, { recursive: true });
-      }
-
-      // Save to public/uploads/videos directory
-      const videoPath = path.join(videosDir, videoFileName);
-      await writeFile(videoPath, videoBuffer);
-
-      videoUrl = `/uploads/videos/${videoFileName}`;
+      const uploadParams = {
+        Bucket: process.env.AWS_BUCKET_NAME!,
+        Key: `uploads/${videoFileName}`,
+        Body: videoBody,
+        ContentType: videoFile.type ?? undefined,
+      };
+      const command = new PutObjectCommand(uploadParams);
+      await s3Client.send(command);
+      videoUrl = `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/uploads/${videoFileName}`;
     }
 
     const newExercise = await prisma.exercise.create({

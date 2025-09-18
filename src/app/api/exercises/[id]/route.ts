@@ -1,8 +1,8 @@
 import { prisma } from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
-import { writeFile, mkdir, unlink } from "fs/promises";
-import path from "path";
-import { existsSync } from "fs";
+import s3Client from "../../../../../config/aws";
+import { PutObjectCommand } from "@aws-sdk/client-s3";
+import { v4 as uuidv4 } from "uuid";
 
 export async function PUT(
   request: NextRequest,
@@ -42,124 +42,54 @@ export async function PUT(
     let imageUrl = existingExercise.imageUrl;
     let videoUrl = existingExercise.videoUrl;
 
-    // Handle image removal
+    // Helper to convert File to Uint8Array
+    async function fileToUint8Array(file: File): Promise<Uint8Array> {
+      const arrayBuffer = await file.arrayBuffer();
+      return new Uint8Array(arrayBuffer);
+    }
+
+    // Handle image removal (just clear URL)
     if (removeImage && existingExercise.imageUrl) {
-      const oldImagePath = path.join(
-        process.cwd(),
-        "public",
-        existingExercise.imageUrl,
-      );
-      if (existsSync(oldImagePath)) {
-        try {
-          await unlink(oldImagePath);
-        } catch (error) {
-          console.warn("Failed to delete old image:", error);
-        }
-      }
       imageUrl = "";
     }
 
-    // Handle video removal
+    // Handle video removal (just clear URL)
     if (removeVideo && existingExercise.videoUrl) {
-      const oldVideoPath = path.join(
-        process.cwd(),
-        "public",
-        existingExercise.videoUrl,
-      );
-      if (existsSync(oldVideoPath)) {
-        try {
-          await unlink(oldVideoPath);
-        } catch (error) {
-          console.warn("Failed to delete old video:", error);
-        }
-      }
       videoUrl = "";
     }
 
-    // Handle new image upload
+    // Handle new image upload to S3
     if (imageFile && imageFile.size > 0) {
-      // Delete old image if exists
-      if (existingExercise.imageUrl) {
-        const oldImagePath = path.join(
-          process.cwd(),
-          "public",
-          existingExercise.imageUrl,
-        );
-        if (existsSync(oldImagePath)) {
-          try {
-            await unlink(oldImagePath);
-          } catch (error) {
-            console.warn("Failed to delete old image:", error);
-          }
-        }
-      }
+      const imageExtension = imageFile.name.split(".").pop();
+      const imageFileName = `${Date.now()}-${uuidv4()}.${imageExtension}`;
+      const imageBody = await fileToUint8Array(imageFile);
 
-      const imageBytes = await imageFile.arrayBuffer();
-      const imageBuffer = Buffer.from(imageBytes);
-
-      // Generate unique filename
-      const imageExtension = path.extname(imageFile.name);
-      const imageFileName = `${Date.now()}-${Math.random().toString(36).substring(2)}${imageExtension}`;
-
-      // Create uploads/images directory if it doesn't exist
-      const uploadsDir = path.join(process.cwd(), "public", "uploads");
-      const imagesDir = path.join(uploadsDir, "images");
-
-      if (!existsSync(uploadsDir)) {
-        await mkdir(uploadsDir, { recursive: true });
-      }
-      if (!existsSync(imagesDir)) {
-        await mkdir(imagesDir, { recursive: true });
-      }
-
-      // Save to public/uploads/images directory
-      const imagePath = path.join(imagesDir, imageFileName);
-      await writeFile(imagePath, imageBuffer);
-
-      imageUrl = `/uploads/images/${imageFileName}`;
+      const uploadParams = {
+        Bucket: process.env.AWS_BUCKET_NAME!,
+        Key: `uploads/${imageFileName}`,
+        Body: imageBody,
+        ContentType: imageFile.type ?? undefined,
+      };
+      const command = new PutObjectCommand(uploadParams);
+      await s3Client.send(command);
+      imageUrl = `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/uploads/${imageFileName}`;
     }
 
-    // Handle new video upload
+    // Handle new video upload to S3
     if (videoFile && videoFile.size > 0) {
-      // Delete old video if exists
-      if (existingExercise.videoUrl) {
-        const oldVideoPath = path.join(
-          process.cwd(),
-          "public",
-          existingExercise.videoUrl,
-        );
-        if (existsSync(oldVideoPath)) {
-          try {
-            await unlink(oldVideoPath);
-          } catch (error) {
-            console.warn("Failed to delete old video:", error);
-          }
-        }
-      }
+      const videoExtension = videoFile.name.split(".").pop();
+      const videoFileName = `${Date.now()}-${uuidv4()}.${videoExtension}`;
+      const videoBody = await fileToUint8Array(videoFile);
 
-      const videoBytes = await videoFile.arrayBuffer();
-      const videoBuffer = Buffer.from(videoBytes);
-
-      // Generate unique filename
-      const videoExtension = path.extname(videoFile.name);
-      const videoFileName = `${Date.now()}-${Math.random().toString(36).substring(2)}${videoExtension}`;
-
-      // Create uploads/videos directory if it doesn't exist
-      const uploadsDir = path.join(process.cwd(), "public", "uploads");
-      const videosDir = path.join(uploadsDir, "videos");
-
-      if (!existsSync(uploadsDir)) {
-        await mkdir(uploadsDir, { recursive: true });
-      }
-      if (!existsSync(videosDir)) {
-        await mkdir(videosDir, { recursive: true });
-      }
-
-      // Save to public/uploads/videos directory
-      const videoPath = path.join(videosDir, videoFileName);
-      await writeFile(videoPath, videoBuffer);
-
-      videoUrl = `/uploads/videos/${videoFileName}`;
+      const uploadParams = {
+        Bucket: process.env.AWS_BUCKET_NAME!,
+        Key: `uploads/${videoFileName}`,
+        Body: videoBody,
+        ContentType: videoFile.type ?? undefined,
+      };
+      const command = new PutObjectCommand(uploadParams);
+      await s3Client.send(command);
+      videoUrl = `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/uploads/${videoFileName}`;
     }
 
     const updatedExercise = await prisma.exercise.update({
@@ -200,36 +130,7 @@ export async function DELETE(
       );
     }
 
-    // Delete associated files before deleting the database record
-    if (existingExercise.imageUrl) {
-      const imagePath = path.join(
-        process.cwd(),
-        "public",
-        existingExercise.imageUrl,
-      );
-      if (existsSync(imagePath)) {
-        try {
-          await unlink(imagePath);
-        } catch (error) {
-          console.warn("Failed to delete image file:", error);
-        }
-      }
-    }
-
-    if (existingExercise.videoUrl) {
-      const videoPath = path.join(
-        process.cwd(),
-        "public",
-        existingExercise.videoUrl,
-      );
-      if (existsSync(videoPath)) {
-        try {
-          await unlink(videoPath);
-        } catch (error) {
-          console.warn("Failed to delete video file:", error);
-        }
-      }
-    }
+    // Não há mais arquivos locais para excluir, apenas remove do banco
 
     // Delete the exercise from database
     await prisma.exercise.delete({

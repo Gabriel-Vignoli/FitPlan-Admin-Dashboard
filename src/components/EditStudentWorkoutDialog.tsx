@@ -253,7 +253,7 @@ export default function EditStudentWorkoutDialog({
   const handleDayChange = (value: string) => {
     setFormData((prev) => ({
       ...prev,
-      dayOfWeek: value, // Store as string for display
+      dayOfWeek: value, 
     }));
 
     if (error) {
