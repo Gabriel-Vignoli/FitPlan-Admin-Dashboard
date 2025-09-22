@@ -33,7 +33,6 @@ model Plan {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  // Relacionamentos
   students Student[]
 }
 
@@ -54,6 +53,7 @@ model Student {
   isActive    Boolean     @default(true)
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
+  paymentStatusUpdatedAt DateTime @default(now())
 
   planId         String
   plan           Plan          @relation(fields: [planId], references: [id])
