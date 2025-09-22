@@ -85,7 +85,7 @@ export default function DashboardClient() {
         />
 
         <StatCard
-          title="Novos Alunos (Este Mês)"
+          title="Novos Alunos Este Mês"
           value={dashboardData?.students?.current?.toString() || "0"}
           percentage={`${dashboardData?.students?.changePercentage || 0}%`}
           chartData={createChartData(

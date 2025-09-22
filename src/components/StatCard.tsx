@@ -1,6 +1,12 @@
 "use client";
-import React from 'react';
-import { AreaChart, Area, ResponsiveContainer } from 'recharts';
+import React from "react";
+import {
+  AreaChart,
+  Area,
+  ResponsiveContainer,
+  Tooltip,
+  CartesianGrid,
+} from "recharts";
 
 interface StatCardProps {
   title: string;
@@ -10,64 +16,98 @@ interface StatCardProps {
   chartColor?: string;
   isPositive?: boolean;
 }
-
-export default function StatCard({ 
-  title, 
-  value, 
-  percentage, 
-  chartData = [],
-  chartColor = "#10b981",
-  isPositive = true
-}: StatCardProps) {
-  
+export default function StatCard(props: StatCardProps) {
+  const {
+    title,
+    value,
+    percentage,
+    chartData = [],
+    chartColor = "#10b981",
+    isPositive = true,
+  } = props;
   const defaultData = [
-    { value: 20 }, { value: 35 }, { value: 25 }, { value: 45 }, 
-    { value: 60 }, { value: 55 }, { value: 70 }, { value: 65 }, 
-    { value: 80 }, { value: 75 }
+    { value: 20 },
+    { value: 35 },
+    { value: 25 },
+    { value: 45 },
+    { value: 60 },
+    { value: 55 },
+    { value: 70 },
+    { value: 65 },
+    { value: 80 },
+    { value: 75 },
   ];
-
   const data = chartData.length > 0 ? chartData : defaultData;
-
   return (
-    <div className="rounded-[8px] border border-white/30 bg-[#101010] backdrop-blur-sm p-4 sm:p-6 h-full flex flex-col">
-      <h3 className="text-sm sm:text-base md:text-lg font-medium text-white/90 mb-2 sm:mb-4">
+    <div className="flex h-full flex-col rounded-xl border border-white/20 bg-gradient-to-br from-[#18181b] to-[#23272f] p-4 shadow-lg backdrop-blur-md sm:p-6">
+      <h3 className="mb-2 text-sm font-medium text-white/90 sm:mb-4 sm:text-base md:text-lg">
         {title}
       </h3>
-      
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 flex-grow">
+
+      <div className="flex flex-grow flex-col justify-between gap-4 sm:flex-row sm:items-end">
         <div className="flex flex-col">
-          <p className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-white mb-1 sm:mb-3">
+          <p className="mb-1 text-xl font-bold text-white sm:mb-3 sm:text-2xl md:text-3xl lg:text-4xl">
             {value}
           </p>
           <div className="flex flex-col">
-            <span className={`text-xs sm:text-sm font-medium flex items-center gap-1 ${
-              isPositive ? 'text-green-400' : 'text-red-400'
-            }`}>
+            <span
+              className={`flex items-center gap-1 text-xs font-medium sm:text-sm ${
+                isPositive ? "text-green-400" : "text-red-400"
+              }`}
+            >
               <span className="text-sm sm:text-base">
-                {isPositive ? '↗' : '↘'}
+                {isPositive ? "↗" : "↘"}
               </span>
-              {percentage.replace(/^\+?/, '')}
+              {percentage.replace(/^\+?/, "")}
             </span>
-            <span className="text-xs sm:text-sm text-gray-400 mt-1">esse mês</span>
+            <span className="mt-1 text-xs text-gray-400 sm:text-sm">
+              esse mês
+            </span>
           </div>
         </div>
-        
-        <div className="w-full sm:w-32 md:w-40 lg:w-48 xl:w-56 h-12 sm:h-16 md:h-20 lg:h-24">
+
+        <div className="h-16 w-full sm:h-20 sm:w-32 md:h-24 md:w-40 lg:h-28 lg:w-48 xl:w-56">
           <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={data}>
+            <AreaChart
+              data={data}
+              margin={{ top: 10, right: 20, left: 0, bottom: 0 }}
+            >
               <defs>
-                <linearGradient id={`gradient-${title.replace(/\s+/g, '')}`} x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor={chartColor} stopOpacity={0.4}/>
-                  <stop offset="95%" stopColor={chartColor} stopOpacity={0.1}/>
+                <linearGradient
+                  id={`gradient-${title.replace(/\s+/g, "")}`}
+                  x1="0"
+                  y1="0"
+                  x2="0"
+                  y2="1"
+                >
+                  <stop offset="5%" stopColor={chartColor} stopOpacity={0.6} />
+                  <stop offset="95%" stopColor={chartColor} stopOpacity={0.1} />
                 </linearGradient>
               </defs>
               <Area
                 type="monotone"
                 dataKey="value"
                 stroke={chartColor}
-                strokeWidth={1.5}
-                fill={`url(#gradient-${title.replace(/\s+/g, '')})`}
-                dot={false}
+                strokeWidth={2}
+                fill={`url(#gradient-${title.replace(/\s+/g, "")})`}
+                dot={{ r: 3, stroke: chartColor, strokeWidth: 2, fill: "#fff" }}
+                isAnimationActive={true}
+              />
+              <Tooltip
+                contentStyle={{
+                  background: "#23272f",
+                  border: "none",
+                  borderRadius: 8,
+                  color: "#fff",
+                  fontWeight: 500,
+                }}
+                labelStyle={{ color: "#fff" }}
+                cursor={{ stroke: chartColor, strokeWidth: 1, opacity: 0.2 }}
+              />
+              <CartesianGrid
+                strokeDasharray="3 3"
+                stroke="#23272f"
+                opacity={0.3}
               />
             </AreaChart>
           </ResponsiveContainer>
