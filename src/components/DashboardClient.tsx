@@ -2,6 +2,7 @@
 
 import StatCard from "@/components/StatCard";
 import MainChart from "@/components/MainChart";
+import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
 import Loader from "./Loader";
 
@@ -144,28 +145,29 @@ export default function DashboardClient() {
       </div>
 
       {/* Main Chart Section with Tabs */}
-      <div className="rounded-xl bg-gradient-to-br from-[#18181b] to-[#23272f] p-6 shadow-lg">
+      <div className="rounded-[8px] bg-gradient-to-br from-[#19191b] to-[#17191d
+      ] p-6 shadow-lg">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-xl font-semibold text-white">Total de Alunos</h2>
           <div className="flex gap-2">
-            <button
-              className={`rounded px-4 py-1 font-medium text-white transition ${selectedRange === "thisMonth" ? "bg-[#10b981]" : "bg-[#23272f] hover:bg-[#18181b]"}`}
+            <Button
+              className={`px-4 py-1 font-medium text-white transition ${selectedRange === "thisMonth" ? "bg-primary/80" : "bg-[#23272f] hover:bg-[#18181b]"}`}
               onClick={() => setSelectedRange("thisMonth")}
             >
               Este mês (cada 3 dias)
-            </button>
-            <button
-              className={`rounded px-4 py-1 font-medium text-white transition ${selectedRange === "last3Months" ? "bg-[#10b981]" : "bg-[#23272f] hover:bg-[#18181b]"}`}
+            </Button>
+            <Button
+              className={`px-4 py-1 font-medium text-white transition ${selectedRange === "last3Months" ? "bg-primary/80" : "bg-[#23272f] hover:bg-[#18181b]"}`}
               onClick={() => setSelectedRange("last3Months")}
             >
               Últimos 3 meses (cada 15 dias)
-            </button>
-            <button
-              className={`rounded px-4 py-1 font-medium text-white transition ${selectedRange === "lastYear" ? "bg-[#10b981]" : "bg-[#23272f] hover:bg-[#18181b]"}`}
+            </Button>
+            <Button
+              className={`px-4 py-1 font-medium text-white transition ${selectedRange === "lastYear" ? "bg-primary/80" : "bg-[#23272f] hover:bg-[#18181b]"}`}
               onClick={() => setSelectedRange("lastYear")}
             >
               Último ano (mensal)
-            </button>
+            </Button>
           </div>
         </div>
         <div className="h-64 w-full">

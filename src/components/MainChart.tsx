@@ -28,8 +28,8 @@ export default function MainChart({ data }: MainChartProps) {
         >
           <defs>
             <linearGradient id="colorTotal" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#10b981" stopOpacity={0.6} />
-              <stop offset="95%" stopColor="#10b981" stopOpacity={0.1} />
+              <stop offset="5%" stopColor="#F8BD01" stopOpacity={0.6} />
+              <stop offset="95%" stopColor="#F8BD01" stopOpacity={0.1} />
             </linearGradient>
             <linearGradient id="colorNew" x1="0" y1="0" x2="0" y2="1">
               <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.6} />
@@ -38,11 +38,7 @@ export default function MainChart({ data }: MainChartProps) {
           </defs>
           <XAxis dataKey="date" tick={{ fill: "#d1d5db", fontSize: 12 }} />
           <YAxis tick={{ fill: "#d1d5db", fontSize: 12 }} />
-          <CartesianGrid
-            strokeDasharray="3 3"
-            stroke="#23272f"
-            opacity={0.3}
-          />
+          <CartesianGrid strokeDasharray="3 3" stroke="#23272f" opacity={0.3} />
           <Tooltip
             contentStyle={{
               background: "#23272f",
@@ -59,10 +55,10 @@ export default function MainChart({ data }: MainChartProps) {
             type="monotone"
             dataKey="totalStudents"
             name="Total de Alunos"
-            stroke="#10b981"
+            stroke="#F8BD01"
             fill="url(#colorTotal)"
             strokeWidth={2}
-            dot={{ r: 3, stroke: "#10b981", strokeWidth: 2, fill: "#fff" }}
+            dot={{ r: 3, stroke: "#F8BD01", strokeWidth: 2, fill: "#fff" }}
             isAnimationActive={true}
           />
           <Area

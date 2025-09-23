@@ -19,7 +19,7 @@ export default function StatCard(props: StatCardProps) {
     description,
   } = props;
   return (
-    <div className="flex h-full flex-col rounded-xl border border-white/20 bg-gradient-to-br from-[#18181b] to-[#23272f] p-4 shadow-lg backdrop-blur-md sm:p-6">
+    <div className="flex h-full flex-col rounded-[8px] bg-gradient-to-br from-[#18181b] to-[#17191d] p-4 shadow-lg backdrop-blur-md sm:p-6">
       <h3 className="mb-2 text-sm font-medium text-white/90 sm:mb-4 sm:text-base md:text-lg">
         {title}
       </h3>

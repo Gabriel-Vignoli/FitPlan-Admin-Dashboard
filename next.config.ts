@@ -15,6 +15,12 @@ const nextConfig: NextConfig = {
         pathname: "/uploads/**",
       },
       {
+        protocol: "http",
+        hostname: "192.168.56.1",
+        port: "3000",
+        pathname: "/uploads/**",
+      },
+      {
         protocol: "https",
         hostname: "montanini-dashboard.vercel.app",
         pathname: "/uploads/**",
