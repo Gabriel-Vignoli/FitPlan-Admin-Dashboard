@@ -145,32 +145,36 @@ export default function DashboardClient() {
       </div>
 
       {/* Main Chart Section with Tabs */}
-      <div className="rounded-[8px] bg-gradient-to-br from-[#19191b] to-[#17191d
-      ] p-6 shadow-lg">
-        <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-xl font-semibold text-white">Total de Alunos</h2>
-          <div className="flex gap-2">
+      <div className="rounded-[8px] bg-gradient-to-br from-[#19191b] to-[#17191d] p-4 shadow-lg sm:p-6">
+        <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <h2 className="text-lg font-semibold text-white sm:text-xl">
+            Total de Alunos
+          </h2>
+          <div className="flex flex-wrap gap-2">
             <Button
-              className={`px-4 py-1 font-medium text-white transition ${selectedRange === "thisMonth" ? "bg-primary/80" : "bg-[#23272f] hover:bg-[#18181b]"}`}
+              className={`px-3 py-1 font-medium text-white transition sm:px-4 ${selectedRange === "thisMonth" ? "bg-primary/80" : "bg-[#23272f] hover:bg-[#18181b]"}`}
               onClick={() => setSelectedRange("thisMonth")}
             >
               Este mês (cada 3 dias)
             </Button>
             <Button
-              className={`px-4 py-1 font-medium text-white transition ${selectedRange === "last3Months" ? "bg-primary/80" : "bg-[#23272f] hover:bg-[#18181b]"}`}
+              className={`px-3 py-1 font-medium text-white transition sm:px-4 ${selectedRange === "last3Months" ? "bg-primary/80" : "bg-[#23272f] hover:bg-[#18181b]"}`}
               onClick={() => setSelectedRange("last3Months")}
             >
               Últimos 3 meses (cada 15 dias)
             </Button>
             <Button
-              className={`px-4 py-1 font-medium text-white transition ${selectedRange === "lastYear" ? "bg-primary/80" : "bg-[#23272f] hover:bg-[#18181b]"}`}
+              className={`px-3 py-1 font-medium text-white transition sm:px-4 ${selectedRange === "lastYear" ? "bg-primary/80" : "bg-[#23272f] hover:bg-[#18181b]"}`}
               onClick={() => setSelectedRange("lastYear")}
             >
               Último ano (mensal)
             </Button>
           </div>
         </div>
-        <div className="h-64 w-full">
+        <div
+          className="w-full"
+          style={{ minHeight: "220px", height: "40vw", maxHeight: 450 }}
+        >
           <MainChart data={chartData} />
         </div>
       </div>
