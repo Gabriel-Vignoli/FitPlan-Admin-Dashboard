@@ -6,6 +6,8 @@ import {
   isValidEmail,
   isValidPhone,
 } from "@/lib/utils/validations";
+// import { Resend } from "resend";
+// const resend = new Resend(process.env.RESEND_API_KEY);
 
 // Find all users or search by name with pagination
 export async function GET(request: NextRequest) {
@@ -41,9 +43,9 @@ export async function GET(request: NextRequest) {
             paymentStatus: true,
             plan: {
               select: {
-                name: true
-              }
-            }
+                name: true,
+              },
+            },
           },
           orderBy: {
             [sortBy]: sortOrder as "asc" | "desc",
@@ -51,7 +53,7 @@ export async function GET(request: NextRequest) {
         }),
         prisma.student.count({
           where: whereClause,
-        })
+        }),
       ]);
 
       const totalPages = Math.ceil(totalCount / limit);
@@ -68,14 +70,14 @@ export async function GET(request: NextRequest) {
             totalItems: totalCount,
             itemsPerPage: limit,
             hasNextPage,
-            hasPreviousPage
+            hasPreviousPage,
           },
           query: {
             search: searchQuery,
             sortBy,
-            sortOrder
-          }
-        }
+            sortOrder,
+          },
+        },
       });
     }
 
@@ -96,12 +98,12 @@ export async function GET(request: NextRequest) {
           paymentStatus: true,
           plan: {
             select: {
-              name: true
-            }
-          }
-        }
+              name: true,
+            },
+          },
+        },
       }),
-      prisma.student.count()
+      prisma.student.count(),
     ]);
 
     const totalPages = Math.ceil(totalCount / limit);
@@ -118,21 +120,21 @@ export async function GET(request: NextRequest) {
           totalItems: totalCount,
           itemsPerPage: limit,
           hasNextPage,
-          hasPreviousPage
+          hasPreviousPage,
         },
         query: {
           search: searchQuery || "",
           sortBy,
-          sortOrder
-        }
-      }
+          sortOrder,
+        },
+      },
     });
   } catch (error) {
     console.error("Error fetching alunos:", error);
     return NextResponse.json(
-      { 
+      {
         success: false,
-        error: "Failed to fetch alunos" 
+        error: "Failed to fetch alunos",
       },
       { status: 500 },
     );
@@ -212,11 +214,20 @@ export async function POST(request: NextRequest) {
         email,
         phone,
         birthDate: new Date(birthDate),
-        password: password, 
+        password: password,
         cpf,
         planId,
       },
     });
+
+    // await resend.emails.send({
+    //   from: "Academia <onboarding@resend.dev>",
+    //   to: email,
+    //   subject: "Sua senha de acesso",
+    //   html: `<p>Olá ${name},</p>
+    //      <p>Bem-vindo! Sua senha de acesso é: <strong>${password}</strong></p>
+    //      <p>Por favor, altere sua senha após o primeiro acesso.</p>`,
+    // });
 
     return NextResponse.json(
       { message: "Usuário criado com sucesso" },
