@@ -45,6 +45,11 @@ export default function Sidebar({ admin }: SidebarProps) {
     setIsCollapsed(!isCollapsed);
   };
 
+  // Navigate to profile when clicking on avatar
+  const handleAvatarClick = () => {
+    handleMenuItemClick('/perfil');
+  };
+
   // Close mobile menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -80,6 +85,42 @@ export default function Sidebar({ admin }: SidebarProps) {
       document.body.style.overflow = 'unset';
     };
   }, [isMobileMenuOpen]);
+
+
+  const AdminAvatar = ({ size, clickable = false }: { size: number; clickable?: boolean }) => {
+    const avatarElement = admin.avatar ? (
+      <div className={`relative rounded-full overflow-hidden bg-indigo-500 transition-all duration-200 ${
+        clickable ? 'hover:opacity-80 cursor-pointer' : ''
+      }`} style={{ width: size, height: size }}>
+        <Image
+          src={admin.avatar}
+          alt={`Avatar de ${admin.name}`}
+          width={size}
+          height={size}
+          className="object-cover"
+        />
+      </div>
+    ) : (
+      <div 
+        className={`flex items-center justify-center rounded-full bg-indigo-500 transition-all duration-200 ${
+          clickable ? 'hover:bg-indigo-600 cursor-pointer' : ''
+        }`}
+        style={{ width: size, height: size }}
+      >
+        <span className="font-semibold text-white" style={{ fontSize: size * 0.4 }}>
+          {admin.name.charAt(0).toUpperCase()}
+        </span>
+      </div>
+    );
+
+    return clickable ? (
+      <button onClick={handleAvatarClick} className="focus:outline-none focus:ring-2 focus:ring-primary rounded-full">
+        {avatarElement}
+      </button>
+    ) : (
+      avatarElement
+    );
+  };
 
   const SidebarContent = ({ isMobile = false }: { isMobile?: boolean }) => (
     <div className={`flex flex-col border-r border-white/30 bg-[#070707] shadow-lg h-full transition-all duration-300 ease-in-out ${
@@ -199,14 +240,7 @@ export default function Sidebar({ admin }: SidebarProps) {
       }`}>
         {!isMobile && isCollapsed ? (
           <div className="flex flex-col items-center space-y-3">
-            <div 
-              className="flex h-12 w-12 items-center justify-center rounded-full bg-indigo-500 transition-all duration-200 hover:bg-indigo-600 cursor-pointer"
-              title={`${admin.name} (${admin.email})`}
-            >
-              <span className="font-semibold text-white text-lg">
-                {admin.name.charAt(0).toUpperCase()}
-              </span>
-            </div>
+            <AdminAvatar size={48} clickable={true} />
             <Button
               onClick={handleLogout}
               variant="destructive"
@@ -220,11 +254,7 @@ export default function Sidebar({ admin }: SidebarProps) {
         ) : (
           <>
             <div className="mb-3 flex items-center space-x-3">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-indigo-500 transition-all duration-200 hover:bg-indigo-600">
-                <span className="font-semibold text-white text-lg">
-                  {admin.name.charAt(0).toUpperCase()}
-                </span>
-              </div>
+              <AdminAvatar size={48} clickable={true} />
               <div className="flex-1 min-w-0">
                 <p className="font-semibold text-white truncate">{admin.name}</p>
                 <p className="text-sm text-white/60 truncate">{admin.email}</p>
@@ -251,7 +281,7 @@ export default function Sidebar({ admin }: SidebarProps) {
       <button
         id="hamburger-button"
         onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-        className="fixed top-4 left-4 z-50 p-2 rounded-lg bg-[#070707] text-white border border-white/30 md:hidden hover:bg-[#0a0a0a] transition-colors duration-200"
+        className="fixed top-4 left-4 z-50 p-2 rounded-[8px] bg-[#070707] text-white border border-white/30 md:hidden hover:bg-[#0a0a0a] transition-colors duration-200"
         aria-label="Toggle menu"
       >
         {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}

@@ -10,12 +10,14 @@ export interface AdminData {
   id: string
   name: string
   email: string
+  avatar?: string 
 }
 
 interface AdminJwtPayload extends JwtPayload {
   id: string
   email: string
   name: string
+  avatar?: string 
 }
 
 // Criptografa uma senha usando bcrypt com fator de custo 12
@@ -34,7 +36,8 @@ export function generateToken(adminData: AdminData): string {
     { 
       id: adminData.id, 
       email: adminData.email,
-      name: adminData.name 
+      name: adminData.name,
+      avatar: adminData.avatar 
     },
     JWT_SECRET,
     { expiresIn: '7d' } // Token expira em 7 dias
@@ -46,7 +49,8 @@ export async function generateTokenEdge(adminData: AdminData): Promise<string> {
   return await new SignJWT({
     id: adminData.id,
     email: adminData.email,
-    name: adminData.name
+    name: adminData.name,
+    avatar: adminData.avatar 
   })
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt() 
@@ -61,7 +65,8 @@ export function verifyToken(token: string): AdminData | null {
     return {
       id: decoded.id,
       email: decoded.email,
-      name: decoded.name
+      name: decoded.name,
+      avatar: decoded.avatar 
     }
   } catch {
     return null 
@@ -75,7 +80,8 @@ export async function verifyTokenEdge(token: string): Promise<AdminData | null> 
     return {
       id: payload.id as string,
       email: payload.email as string,
-      name: payload.name as string
+      name: payload.name as string,
+      avatar: payload.avatar as string | undefined 
     }
   } catch {
     return null 

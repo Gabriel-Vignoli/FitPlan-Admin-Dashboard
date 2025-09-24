@@ -15,9 +15,16 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Busca o admin no banco
+    // Busca o admin no banco 
     const admin = await prisma.admin.findUnique({
-      where: { email }
+      where: { email },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        password: true,
+        avatar: true, 
+      }
     })
 
     if (!admin) {
@@ -41,7 +48,8 @@ export async function POST(request: NextRequest) {
     const token = generateToken({
       id: admin.id,
       name: admin.name,
-      email: admin.email
+      email: admin.email,
+      avatar: admin.avatar || undefined 
     })
 
     // Define o cookie
@@ -58,7 +66,8 @@ export async function POST(request: NextRequest) {
       admin: {
         id: admin.id,
         name: admin.name,
-        email: admin.email
+        email: admin.email,
+        avatar: admin.avatar || undefined 
       }
     })
 
