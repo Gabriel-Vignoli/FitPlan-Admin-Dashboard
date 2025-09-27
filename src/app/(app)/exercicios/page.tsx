@@ -61,7 +61,7 @@ export default function ExercisesPage() {
   }
 
   return (
-    <div className="p-8">
+    <div className="p-5 md:p-8">
       <div className="mb-10">
         <Header
           title="Gerencie seus exercícios"

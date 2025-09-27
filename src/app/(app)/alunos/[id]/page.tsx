@@ -168,7 +168,7 @@ export default function AlunoPage() {
   };
 
   return (
-    <div className="p-8">
+    <div className="p-5 md:p-8">
       <Header
         buttonText="Voltar"
         description="Veja todos os dados de seu aluno"

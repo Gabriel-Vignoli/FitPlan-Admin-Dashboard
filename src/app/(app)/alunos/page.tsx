@@ -172,7 +172,7 @@ export default function AlunosPage() {
   }
 
   return (
-    <div className="p-8">
+    <div className="p-5 md:p-8">
       <div className="mb-10">
         <Header
           buttonText="Adicionar Aluno"

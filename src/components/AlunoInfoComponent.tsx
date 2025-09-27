@@ -63,12 +63,12 @@ const StudentInfoComponent: React.FC<StudentInfoProps> = ({
   };
 
   return (
-    <div className="mx-auto max-w-4xl p-6">
+    <div className="mx-auto max-w-4xl">
       {/* Header Section */}
       <div className="mb-8 flex flex-col items-center gap-6 md:flex-row md:items-start">
         <div className="relative">
           {student.avatar ? (
-            <div className="flex h-32 w-32 items-center justify-center rounded-full border-4 border-gray-200 bg-indigo-600 overflow-hidden">
+            <div className="flex h-32 w-32 items-center justify-center overflow-hidden rounded-full border-4 border-gray-200 bg-indigo-600">
               <Image
                 src={student.avatar}
                 alt={student.name}
@@ -87,7 +87,9 @@ const StudentInfoComponent: React.FC<StudentInfoProps> = ({
         </div>
 
         <div className="flex-1 text-center md:text-left">
-          <h1 className="mb-2 text-3xl font-bold">{student.name}</h1>
+          <h1 className="mb-2 text-2xl font-bold md:text-3xl">
+            {student.name}
+          </h1>
           <div className="mb-4 flex flex-col gap-2 md:flex-row">
             <span className="bg-primary/20 text-primary rounded-full px-3 py-1 text-sm font-medium">
               {plan?.name || "Plano não encontrado"}
@@ -128,7 +130,14 @@ const StudentInfoComponent: React.FC<StudentInfoProps> = ({
             <div className="flex items-center gap-2">
               <Mail className="text-primary h-4 w-4" />
               <span className="text-sm text-white/80">Email:</span>
-              <span className="text-sm font-medium">{student.email}</span>
+              <span
+                className="block max-w-[140px] truncate text-sm font-medium"
+                title={student.email}
+              >
+                {student.email.length > 22
+                  ? student.email.slice(0, 19) + ".  "
+                  : student.email}
+              </span>
             </div>
             <div className="flex items-center gap-2">
               <Phone className="text-primary h-4 w-4" />
@@ -254,8 +263,6 @@ const StudentInfoComponent: React.FC<StudentInfoProps> = ({
           </div>
         </div>
       </div>
-
-      
     </div>
   );
 };

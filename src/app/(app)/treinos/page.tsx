@@ -50,7 +50,7 @@ export default function WorkoutsPage() {
   };
 
   return (
-    <div className="p-8">
+    <div className="p-5 md:p-8">
       <Header
         title="Gerencie seus treinos"
         description="Escolha os exercícios ideais para os treinos de seus alunos"

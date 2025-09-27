@@ -98,11 +98,11 @@ export default function AlunoWorkouts({
     setWorkouts((prevWorkouts) => [...prevWorkouts, newWorkout]);
   };
 
-   const handleWorkoutUpdated = (updatedWorkout: StudentWorkout) => {
+  const handleWorkoutUpdated = (updatedWorkout: StudentWorkout) => {
     setWorkouts((prevWorkouts) =>
       prevWorkouts.map((workout) =>
-        workout.id === updatedWorkout.id ? updatedWorkout : workout
-      )
+        workout.id === updatedWorkout.id ? updatedWorkout : workout,
+      ),
     );
   };
 
@@ -169,19 +169,19 @@ export default function AlunoWorkouts({
             >
               <div className="mb-3 flex items-start justify-between">
                 <div>
-                  <h4 className="text-lg font-medium">
+                  <h4 className="text-base font-medium md:text-lg">
                     {formatDayofWeekToDay(studentWorkout.dayOfWeek)}:{" "}
                     {studentWorkout.workout.title}
                   </h4>
                   {studentWorkout.workout.description && (
-                    <p className="text-sm text-white/60">
+                    <p className="text-xs text-white/60 md:text-sm">
                       {studentWorkout.workout.description}
                     </p>
                   )}
                 </div>
                 <div className="flex items-center gap-2">
                   <span
-                    className={`rounded-full px-3 py-1 text-sm font-medium ${
+                    className={`rounded-full px-3 py-1 text-xs font-medium md:text-sm ${
                       studentWorkout.isActive
                         ? "bg-green-500/20 text-green-400"
                         : "bg-red-500/20 text-red-400"
@@ -189,7 +189,10 @@ export default function AlunoWorkouts({
                   >
                     {studentWorkout.isActive ? "Ativo" : "Inativo"}
                   </span>
-                   <EditStudentWorkoutDialog studentWorkout={studentWorkout} onWorkoutUpdated={handleWorkoutUpdated}></EditStudentWorkoutDialog>
+                  <EditStudentWorkoutDialog
+                    studentWorkout={studentWorkout}
+                    onWorkoutUpdated={handleWorkoutUpdated}
+                  ></EditStudentWorkoutDialog>
                 </div>
               </div>
 
@@ -201,7 +204,7 @@ export default function AlunoWorkouts({
                     {studentWorkout.workout.exercises.map((workoutExercise) => (
                       <div
                         key={workoutExercise.id}
-                        className="flex items-center justify-between rounded-[8px] bg-[#101010] p-3 transition hover:scale-[1.01] hover:bg-[#151515]"
+                        className="flex flex-col md:flex-row md:items-center justify-between rounded-[8px] bg-[#101010] p-3 transition hover:scale-[1.01] hover:bg-[#151515]"
                       >
                         <div className="flex flex-1 items-center">
                           {/* Image/Icon */}
@@ -226,14 +229,14 @@ export default function AlunoWorkouts({
                             <div className="truncate font-medium">
                               {workoutExercise.exercise.name}
                             </div>
-                            <div className="text-sm text-white/70">
+                            <div className="text-xs text-white/70 md:text-sm">
                               ({workoutExercise.exercise.targetMuscle})
                             </div>
                           </div>
                         </div>
 
                         {/* Workout details */}
-                        <div className="ml-4 flex-shrink-0 text-right text-sm text-white/70">
+                        <div className="ml-4 flex-shrink-0 text-right text-xs text-white/70 md:text-sm">
                           <div>
                             {workoutExercise.sets} séries ×{" "}
                             {workoutExercise.reps} reps
