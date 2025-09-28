@@ -102,7 +102,6 @@ export default function EditAdminProfileForm({ admin }: AdminProfileProps) {
 
       if (res.ok) {
         showToast("Perfil atualizado com sucesso!", "success");
-        // Optional: Update parent component state instead of reload
         setTimeout(() => window.location.reload(), 1500);
       } else {
         const errorData = await res.json().catch(() => ({}));
