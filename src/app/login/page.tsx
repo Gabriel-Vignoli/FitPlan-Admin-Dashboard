@@ -28,13 +28,21 @@ export default function LoginPage() {
         body: JSON.stringify({ email, password }),
       });
 
-      const data = await response.json();
-
-      if (response.ok) {
+      let data = null;
+      const contentType = response.headers.get("content-type");
+      if (
+        response.ok &&
+        contentType &&
+        contentType.includes("application/json")
+      ) {
+        data = await response.json();
         router.push("/dashboard");
         router.refresh();
-      } else {
+      } else if (contentType && contentType.includes("application/json")) {
+        data = await response.json();
         setError(data.error || "Erro ao fazer login");
+      } else {
+        setError("Erro inesperado: resposta não é JSON");
       }
     } catch (error) {
       console.error("Erro ao fazer login:", error);
