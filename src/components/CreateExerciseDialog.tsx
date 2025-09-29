@@ -22,7 +22,7 @@ interface Exercise {
   imageUrl: string;
   videoUrl: string;
 }
-  
+
 interface CreateExerciseDialogProps {
   onExerciseCreated: (exercise: Exercise) => void;
 }
@@ -33,6 +33,7 @@ export default function CreateExerciseDialog({
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [imageError, setImageError] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     name: "",
     targetMuscle: "",
@@ -91,6 +92,7 @@ export default function CreateExerciseDialog({
     setVideoFile(null);
     setImagePreview(null);
     setError(null);
+    setImageError(null);
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -104,6 +106,33 @@ export default function CreateExerciseDialog({
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      // Validate image format by extension and MIME type
+      const allowedExtensions = ["jpg", "jpeg", "png", "jfif"];
+      const allowedTypes = [
+        "image/jpeg",
+        "image/pjpeg",
+        "image/png",
+        "image/x-png",
+        "image/jfif"
+      ];
+      const fileExtension = file.name.split(".").pop()?.toLowerCase();
+
+    
+      if (
+        !fileExtension ||
+        !allowedExtensions.includes(fileExtension) ||
+        !allowedTypes.includes(file.type)
+      ) {
+        setImageError(
+          "Formato de imagem inválido. Apenas JPEG, PNG e JFIF são permitidos.",
+        );
+        setImageFile(null);
+        setImagePreview(null);
+        e.target.value = "";
+        return;
+      }
+
+      setImageError(null);
       setImageFile(file);
       const reader = new FileReader();
       reader.onload = (e) => {
@@ -123,6 +152,7 @@ export default function CreateExerciseDialog({
   const removeImage = () => {
     setImageFile(null);
     setImagePreview(null);
+    setImageError(null);
   };
 
   const removeVideo = () => {
@@ -201,6 +231,15 @@ export default function CreateExerciseDialog({
                 Imagem do Exercício
               </Label>
 
+              {imageError && (
+                <div className="rounded-lg border border-red-500/30 bg-red-500/10 p-3 backdrop-blur-sm">
+                  <p className="flex items-center text-sm text-red-400">
+                    <X className="mr-2 h-4 w-4" />
+                    {imageError}
+                  </p>
+                </div>
+              )}
+
               {imagePreview ? (
                 <div className="relative">
                   <Image
@@ -224,7 +263,7 @@ export default function CreateExerciseDialog({
                 <div className="relative">
                   <Input
                     type="file"
-                    accept="image/*"
+                    accept="image/jpeg,image/png,image/jfif"
                     onChange={handleImageChange}
                     className="hidden"
                     id="image-upload"
@@ -236,6 +275,9 @@ export default function CreateExerciseDialog({
                     <Upload className="mb-2 h-8 w-8 text-gray-400" />
                     <p className="text-sm text-gray-400">
                       Clique para selecionar uma imagem
+                    </p>
+                    <p className="mt-1 text-xs text-gray-500">
+                      JPEG, PNG ou JFIF
                     </p>
                   </Label>
                 </div>

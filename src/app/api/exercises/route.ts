@@ -86,6 +86,50 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Validate image format - 
+    if (imageFile) {
+      // Only allow these specific MIME types
+      const allowedImageTypes = [
+        "image/jpeg",
+        "image/pjpeg", 
+        "image/png",
+        "image/x-png"
+      ];
+      
+      // Only allow these specific extensions
+      const allowedExtensions = ["jpg", "jpeg", "png", "jfif"];
+      
+      const fileExtension = imageFile.name.split(".").pop()?.toLowerCase();
+      
+      if (!allowedImageTypes.includes(imageFile.type)) {
+        return NextResponse.json(
+          { error: "Formato de imagem inválido. Apenas JPEG, PNG e JFIF são permitidos." },
+          { status: 400 },
+        );
+      }
+      
+      if (!fileExtension || !allowedExtensions.includes(fileExtension)) {
+        return NextResponse.json(
+          { error: "Formato de imagem inválido. Apenas JPEG, PNG e JFIF são permitidos." },
+          { status: 400 },
+        );
+      }
+
+      if (imageFile.type === "image/gif" || fileExtension === "gif") {
+        return NextResponse.json(
+          { error: "GIFs não são permitidos. Apenas JPEG, PNG e JFIF são permitidos." },
+          { status: 400 },
+        );
+      }
+
+      if (imageFile.type === "image/webp" || fileExtension === "webp") {
+        return NextResponse.json(
+          { error: "WebP não é permitido. Apenas JPEG, PNG e JFIF são permitidos." },
+          { status: 400 },
+        );
+      }
+    }
+
     let imageUrl = "";
     let videoUrl = "";
 
