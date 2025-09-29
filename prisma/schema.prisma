@@ -35,6 +35,15 @@ model Plan {
 
   students Student[]
 }
+model CompletedWorkouts {
+  id           String   @id @default(cuid())
+  studentId    String
+  workoutId    String
+  completed_at DateTime @default(now())
+
+  student      Student  @relation(fields: [studentId], references: [id])
+  workout      Workout  @relation(fields: [workoutId], references: [id])
+}
 
 // ============== ALUNOS ==============
 
@@ -60,6 +69,7 @@ model Student {
   paymentStatus  PaymentStatus @default(PENDING)
 
   workouts       StudentWorkout[]
+  completedWorkouts CompletedWorkouts[]
 }
 
 enum PaymentStatus {
@@ -92,8 +102,9 @@ model Workout {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  exercises       WorkoutExercise[]
-  studentWorkouts StudentWorkout[]
+  exercises         WorkoutExercise[]
+  studentWorkouts   StudentWorkout[]
+  completedWorkouts CompletedWorkouts[]
 }
 
 model WorkoutExercise {
