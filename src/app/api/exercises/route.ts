@@ -9,10 +9,12 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const searchQuery = searchParams.get("q");
     const page = parseInt(searchParams.get("page") || "1");
-    const limit = parseInt(searchParams.get("limit") || "10");
+    const limit = searchParams.get("limit") === "all" 
+      ? undefined 
+      : parseInt(searchParams.get("limit") || "10");
     const sortBy = searchParams.get("sortBy") || "createdAt";
     const sortOrder = searchParams.get("sortOrder") || "desc";
-    const skip = (page - 1) * limit;
+    const skip = limit ? (page - 1) * limit : 0;
 
     const whereClause =
       searchQuery && searchQuery.length >= 2
@@ -27,7 +29,7 @@ export async function GET(request: NextRequest) {
     const [exercises, totalCount] = await Promise.all([
       prisma.exercise.findMany({
         where: whereClause,
-        skip,
+        skip: limit ? skip : undefined,
         take: limit,
         orderBy: {
           [sortBy]: sortOrder as "asc" | "desc",
@@ -36,8 +38,8 @@ export async function GET(request: NextRequest) {
       prisma.exercise.count({ where: whereClause }),
     ]);
 
-    const totalPages = Math.ceil(totalCount / limit);
-    const hasNextPage = page < totalPages;
+    const totalPages = limit ? Math.ceil(totalCount / limit) : 1;
+    const hasNextPage = limit ? page < totalPages : false;
     const hasPreviousPage = page > 1;
 
     return NextResponse.json({
@@ -48,7 +50,7 @@ export async function GET(request: NextRequest) {
           currentPage: page,
           totalPages,
           totalItems: totalCount,
-          itemsPerPage: limit,
+          itemsPerPage: limit || totalCount,
           hasNextPage,
           hasPreviousPage,
         },
