@@ -1,11 +1,10 @@
 "use client";
 
 import { formatDayofWeekToDay } from "@/lib/utils/formatters";
-import { Dumbbell } from "lucide-react";
-import Image from "next/image";
 import { useEffect, useState } from "react";
 import AddWorkoutToAlunoDialog from "./AddWorkoutToAlunoDialog";
 import EditStudentWorkoutDialog from "./EditStudentWorkoutDialog";
+import ExerciseItem from "./ExerciseItem";
 
 interface Exercise {
   id: string;
@@ -192,7 +191,7 @@ export default function AlunoWorkouts({
                   <EditStudentWorkoutDialog
                     studentWorkout={studentWorkout}
                     onWorkoutUpdated={handleWorkoutUpdated}
-                  ></EditStudentWorkoutDialog>
+                  />
                 </div>
               </div>
 
@@ -202,58 +201,10 @@ export default function AlunoWorkouts({
                   <h5 className="mb-2 font-medium">Exercícios:</h5>
                   <div className="space-y-2">
                     {studentWorkout.workout.exercises.map((workoutExercise) => (
-                      <div
+                      <ExerciseItem
                         key={workoutExercise.id}
-                        className="flex flex-col md:flex-row md:items-center justify-between rounded-[8px] bg-[#101010] p-3 transition hover:scale-[1.01] hover:bg-[#151515]"
-                      >
-                        <div className="flex flex-1 items-center">
-                          {/* Image/Icon */}
-                          <div className="mr-3 flex-shrink-0">
-                            {workoutExercise.exercise.imageUrl ? (
-                              <Image
-                                src={workoutExercise.exercise.imageUrl}
-                                alt={workoutExercise.exercise.name}
-                                width={40}
-                                height={40}
-                                className="rounded-[8px] object-cover"
-                              />
-                            ) : (
-                              <div className="flex h-10 w-10 items-center justify-center rounded-[8px] bg-[#1a1a1a]">
-                                <Dumbbell className="h-5 w-5 text-white/70" />
-                              </div>
-                            )}
-                          </div>
-
-                          {/* Exercise info */}
-                          <div className="min-w-0 flex-1">
-                            <div className="truncate font-medium">
-                              {workoutExercise.exercise.name}
-                            </div>
-                            <div className="text-xs text-white/70 md:text-sm">
-                              ({workoutExercise.exercise.targetMuscle})
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Workout details */}
-                        <div className="ml-4 flex-shrink-0 text-right text-xs text-white/70 md:text-sm">
-                          <div>
-                            {workoutExercise.sets} séries ×{" "}
-                            {workoutExercise.reps} reps
-                          </div>
-                          {(workoutExercise.weight || workoutExercise.rest) && (
-                            <div className="mt-1 text-xs">
-                              {workoutExercise.weight &&
-                                `${workoutExercise.weight}kg`}
-                              {workoutExercise.weight &&
-                                workoutExercise.rest &&
-                                " • "}
-                              {workoutExercise.rest &&
-                                `${workoutExercise.rest}s`}
-                            </div>
-                          )}
-                        </div>
-                      </div>
+                        workoutExercise={workoutExercise}
+                      />
                     ))}
                   </div>
                 </div>
