@@ -1,11 +1,11 @@
 "use client";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Camera, User, Mail, Lock, Check, AlertCircle } from "lucide-react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 interface AdminProfileProps {
   admin: {
@@ -31,6 +31,7 @@ export default function EditAdminProfileForm({ admin }: AdminProfileProps) {
   );
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
+  const [hasChanges, setHasChanges] = useState(false);
   const [toast, setToast] = useState<ToastState>({
     show: false,
     message: "",
@@ -38,6 +39,22 @@ export default function EditAdminProfileForm({ admin }: AdminProfileProps) {
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const router = useRouter();
+
+  useEffect(() => {
+    const nameChanged = name.trim() !== admin.name;
+    const emailChanged = email.trim() !== admin.email;
+    const passwordChanged = password.length > 0;
+    const avatarChanged = avatarFile !== null;
+
+    setHasChanges(
+      nameChanged || emailChanged || passwordChanged || avatarChanged,
+    );
+  }, [name, email, password, avatarFile, admin.name, admin.email]);
+
+  const handleGoBack = () => {
+    router.back();
+  };
 
   const showToast = (message: string, type: "success" | "error") => {
     setToast({ show: true, message, type });
@@ -49,7 +66,6 @@ export default function EditAdminProfileForm({ admin }: AdminProfileProps) {
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
-
     if (!name.trim()) newErrors.name = "Nome é obrigatório";
     if (!email.trim()) newErrors.email = "Email é obrigatório";
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
@@ -64,18 +80,14 @@ export default function EditAdminProfileForm({ admin }: AdminProfileProps) {
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      // Validate file size (max 5MB)
       if (file.size > 5 * 1024 * 1024) {
         showToast("Arquivo muito grande. Máximo 5MB.", "error");
         return;
       }
-
-      // Validate file type
       if (!file.type.startsWith("image/")) {
         showToast("Apenas arquivos de imagem são permitidos.", "error");
         return;
       }
-
       setAvatarFile(file);
       setAvatarPreview(URL.createObjectURL(file));
     }
@@ -83,11 +95,8 @@ export default function EditAdminProfileForm({ admin }: AdminProfileProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     if (!validateForm()) return;
-
     setLoading(true);
-
     try {
       const formData = new FormData();
       formData.append("name", name.trim());
@@ -119,7 +128,6 @@ export default function EditAdminProfileForm({ admin }: AdminProfileProps) {
 
   return (
     <>
-      {/* Toast Notification */}
       {toast.show && (
         <div
           className={`fixed top-4 right-4 z-50 flex items-center gap-2 rounded-lg px-4 py-3 shadow-lg transition-all duration-300 ${
@@ -140,10 +148,9 @@ export default function EditAdminProfileForm({ admin }: AdminProfileProps) {
       <div className="mx-auto flex min-h-screen w-full max-w-6xl items-center justify-center p-4">
         <div className="w-full max-w-4xl">
           <form
-            className="relative w-full rounded-[8px] border border-white/30 bg-gradient-to-br from-[#060606] to-[#18181b] p-12 shadow-2xl"
+            className="relative w-full rounded-[8px] border bg-gradient-to-br from-[#151516] to-[#0a0a0c] p-12 shadow-2xl"
             onSubmit={handleSubmit}
           >
-            {/* Header */}
             <div className="mb-10 text-center">
               <h2 className="mb-3 text-4xl font-bold text-white">
                 Editar Perfil
@@ -154,11 +161,13 @@ export default function EditAdminProfileForm({ admin }: AdminProfileProps) {
             </div>
 
             <div className="grid grid-cols-1 gap-12 lg:grid-cols-3">
-              {/* Avatar Section - Left Column */}
               <div className="flex flex-col items-center justify-start lg:col-span-1">
                 <div className="mb-6 flex flex-col items-center gap-6">
                   <div className="group relative">
-                    <div className="relative h-40 w-40 overflow-hidden rounded-full border-4 border-gray-200 bg-indigo-600">
+                    <div
+                      className="relative h-40 w-40 overflow-hidden rounded-full border-4 border-gray-200 bg-indigo-600 cursor-pointer"
+                      onClick={() => fileInputRef.current?.click()} // clique na imagem também
+                    >
                       <Image
                         src={avatarPreview || "/gym-icon.svg"}
                         alt="Foto de perfil"
@@ -170,6 +179,7 @@ export default function EditAdminProfileForm({ admin }: AdminProfileProps) {
                         <Camera className="h-10 w-10 text-white" />
                       </div>
                     </div>
+
                     <input
                       type="file"
                       accept="image/*"
@@ -177,6 +187,7 @@ export default function EditAdminProfileForm({ admin }: AdminProfileProps) {
                       className="hidden"
                       onChange={handleAvatarChange}
                     />
+
                     <button
                       type="button"
                       className="bg-primary hover:bg-primary/80 absolute -right-2 -bottom-2 rounded-full p-4 text-white shadow-lg transition-colors duration-200"
@@ -194,7 +205,6 @@ export default function EditAdminProfileForm({ admin }: AdminProfileProps) {
                 </div>
               </div>
 
-              {/* Form Fields - Right Columns */}
               <div className="space-y-8 lg:col-span-2">
                 <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                   <div className="space-y-3">
@@ -214,11 +224,7 @@ export default function EditAdminProfileForm({ admin }: AdminProfileProps) {
                         if (errors.name)
                           setErrors((prev) => ({ ...prev, name: "" }));
                       }}
-                      className={`focus:border-primary focus:ring-primary/20 h-12 border-white/30 bg-[#23272f] text-base text-white placeholder:text-gray-400 ${
-                        errors.name
-                          ? "border-red-500 focus:border-red-500 focus:ring-red-500/20"
-                          : ""
-                      }`}
+                      className="border"
                       placeholder="Seu nome completo"
                       required
                     />
@@ -247,11 +253,7 @@ export default function EditAdminProfileForm({ admin }: AdminProfileProps) {
                         if (errors.email)
                           setErrors((prev) => ({ ...prev, email: "" }));
                       }}
-                      className={`focus:border-primary focus:ring-primary/20 h-12 border-white/30 bg-[#23272f] text-base text-white placeholder:text-gray-400 ${
-                        errors.email
-                          ? "border-red-500 focus:border-red-500 focus:ring-red-500/20"
-                          : ""
-                      }`}
+                      className="border"
                       placeholder="seu@email.com"
                       required
                     />
@@ -281,11 +283,7 @@ export default function EditAdminProfileForm({ admin }: AdminProfileProps) {
                       if (errors.password)
                         setErrors((prev) => ({ ...prev, password: "" }));
                     }}
-                    className={`focus:border-primary focus:ring-primary/20 h-12 border-white/30 bg-[#23272f] text-base text-white placeholder:text-gray-400 ${
-                      errors.password
-                        ? "border-red-500 focus:border-red-500 focus:ring-red-500/20"
-                        : ""
-                    }`}
+                    className="border"
                     placeholder="Deixe em branco para manter a atual"
                   />
                   {errors.password && (
@@ -299,18 +297,20 @@ export default function EditAdminProfileForm({ admin }: AdminProfileProps) {
                   )}
                 </div>
 
-                {/* Button Div */}
                 <div className="flex gap-3">
                   <Button
+                    type="button"
                     variant="outline"
                     className="mt-8 h-14 flex-1 text-lg disabled:cursor-not-allowed disabled:opacity-50"
+                    onClick={handleGoBack}
                   >
-                    <Link href="/dashboard">Voltar</Link>{" "}
+                    Voltar
                   </Button>
+
                   <Button
                     type="submit"
                     className="bg-primary/90 mt-8 h-14 flex-1 text-lg text-white disabled:cursor-not-allowed disabled:opacity-50"
-                    disabled={loading}
+                    disabled={loading || !hasChanges}
                   >
                     {loading ? (
                       <div className="flex items-center justify-center gap-3">
@@ -328,7 +328,6 @@ export default function EditAdminProfileForm({ admin }: AdminProfileProps) {
               </div>
             </div>
 
-            {/* Loading Overlay */}
             {loading && (
               <div className="absolute inset-0 flex items-center justify-center rounded-[8px] bg-[#18181b]/80 backdrop-blur-sm">
                 <div className="rounded-lg bg-[#23272f] p-6 shadow-xl">

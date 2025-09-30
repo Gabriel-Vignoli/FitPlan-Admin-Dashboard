@@ -4,7 +4,10 @@ import { useRouter, usePathname } from "next/navigation";
 import { AdminData } from "@/lib/auth";
 import Image from "next/image";
 import { Button } from "./ui/button";
-import { BicepsFlexed, Dumbbell, Home, Users, Menu, X, Diamond, ChevronLeft, ChevronRight, LogOut } from "lucide-react";
+import { 
+  BicepsFlexed, Dumbbell, Home, Users, 
+  Menu, X, Diamond, ChevronLeft, ChevronRight, LogOut 
+} from "lucide-react";
 import { useState, useEffect } from "react";
 
 interface SidebarProps {
@@ -23,7 +26,7 @@ export default function Sidebar({ admin }: SidebarProps) {
     { name: "Alunos", path: "/alunos", icon: <Users size={20} /> },
     { name: "Treinos", path: "/treinos", icon: <BicepsFlexed size={20} /> },
     { name: "Exercícios", path: "/exercicios", icon: <Dumbbell size={20} /> },
-    { name: 'Planos', path: "/planos", icon: <Diamond size={20} /> }
+    { name: "Planos", path: "/planos", icon: <Diamond size={20} /> }
   ];
 
   const handleLogout = async () => {
@@ -45,12 +48,10 @@ export default function Sidebar({ admin }: SidebarProps) {
     setIsCollapsed(!isCollapsed);
   };
 
-  // Navigate to profile when clicking on avatar
   const handleAvatarClick = () => {
     handleMenuItemClick('/perfil');
   };
 
-  // Close mobile menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const sidebar = document.getElementById('mobile-sidebar');
@@ -73,7 +74,6 @@ export default function Sidebar({ admin }: SidebarProps) {
     };
   }, [isMobileMenuOpen]);
 
-  // Prevent body scroll when mobile menu is open
   useEffect(() => {
     if (isMobileMenuOpen) {
       document.body.style.overflow = 'hidden';
@@ -86,18 +86,20 @@ export default function Sidebar({ admin }: SidebarProps) {
     };
   }, [isMobileMenuOpen]);
 
-
   const AdminAvatar = ({ size, clickable = false }: { size: number; clickable?: boolean }) => {
     const avatarElement = admin.avatar ? (
-      <div className={`relative rounded-full overflow-hidden bg-indigo-500 transition-all duration-200 ${
-        clickable ? 'hover:opacity-80 cursor-pointer' : ''
-      }`} style={{ width: size, height: size }}>
+      <div 
+        className={`relative rounded-full overflow-hidden bg-indigo-500 transition-all duration-200 ${
+          clickable ? 'hover:opacity-80 cursor-pointer' : ''
+        }`} 
+        style={{ width: size, height: size }}
+      >
         <Image
           src={admin.avatar}
           alt={`Avatar de ${admin.name}`}
           width={size}
           height={size}
-          className="object-cover"
+          className="object-cover w-full h-full"
         />
       </div>
     ) : (
@@ -159,7 +161,7 @@ export default function Sidebar({ admin }: SidebarProps) {
         )}
       </div>
 
-      {/* Collapse Toggle Button - Only on desktop */}
+      {/* Collapse Toggle */}
       {!isMobile && (
         <div className={`flex justify-center transition-all duration-300 ${
           isCollapsed ? 'px-2 py-2' : 'px-2 py-3'
@@ -211,19 +213,15 @@ export default function Sidebar({ admin }: SidebarProps) {
                   {(isMobile || !isCollapsed) && (
                     <span className="text-[16px] font-medium tracking-wide">{item.name}</span>
                   )}
-                  
-                  {/* Active indicator for collapsed state */}
                   {!isMobile && isCollapsed && pathname === item.path && (
                     <div className="absolute -left-2 top-1/2 transform -translate-y-1/2 w-1 h-6 bg-white rounded-r-md" />
                   )}
                 </button>
-                
-                {/* Enhanced tooltip for collapsed state */}
+
                 {!isMobile && isCollapsed && hoveredItem === item.path && (
                   <div className="absolute left-full ml-3 top-1/2 transform -translate-y-1/2 z-50">
                     <div className="bg-gray-900 text-white text-sm px-3 py-2 rounded-lg shadow-lg border border-white/10 whitespace-nowrap">
                       {item.name}
-                      {/* Tooltip arrow */}
                       <div className="absolute right-full top-1/2 transform -translate-y-1/2 w-0 h-0 border-y-4 border-y-transparent border-r-4 border-r-gray-900" />
                     </div>
                   </div>
@@ -255,8 +253,13 @@ export default function Sidebar({ admin }: SidebarProps) {
           <>
             <div className="mb-3 flex items-center space-x-3">
               <AdminAvatar size={48} clickable={true} />
-              <div className="flex-1 min-w-0">
-                <p className="font-semibold text-white truncate">{admin.name}</p>
+              <div 
+                className="flex-1 min-w-0 cursor-pointer"
+                onClick={() => handleMenuItemClick('/perfil')}
+              >
+                <p className="font-semibold text-white truncate hover:underline">
+                  {admin.name}
+                </p>
                 <p className="text-sm text-white/60 truncate">{admin.email}</p>
               </div>
             </div>
@@ -277,7 +280,7 @@ export default function Sidebar({ admin }: SidebarProps) {
 
   return (
     <>
-      {/* Hamburger Menu Button - Only visible on mobile */}
+      {/* Hamburger Button */}
       <button
         id="hamburger-button"
         onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -287,21 +290,18 @@ export default function Sidebar({ admin }: SidebarProps) {
         {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
       </button>
 
-      {/* Desktop Sidebar - Hidden on mobile */}
+      {/* Desktop Sidebar */}
       <div className="hidden md:block">
         <SidebarContent />
       </div>
 
-      {/* Mobile Sidebar Overlay */}
+      {/* Mobile Sidebar */}
       {isMobileMenuOpen && (
         <div className="fixed inset-0 z-40 md:hidden">
-          {/* Background overlay */}
           <div 
             className="absolute inset-0 bg-black/60 backdrop-blur-sm"
             onClick={() => setIsMobileMenuOpen(false)}
           />
-          
-          {/* Sidebar */}
           <div
             id="mobile-sidebar"
             className={`absolute left-0 top-0 h-full transform transition-transform duration-300 ease-in-out ${
