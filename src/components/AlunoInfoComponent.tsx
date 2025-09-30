@@ -68,13 +68,12 @@ const StudentInfoComponent: React.FC<StudentInfoProps> = ({
       <div className="mb-8 flex flex-col items-center gap-6 md:flex-row md:items-start">
         <div className="relative">
           {student.avatar ? (
-            <div className="flex h-32 w-32 items-center justify-center overflow-hidden rounded-full border-4 border-gray-200 bg-indigo-600">
+            <div className="relative h-32 w-32 overflow-hidden rounded-full border-4 border-gray-200 bg-indigo-600">
               <Image
                 src={student.avatar}
                 alt={student.name}
-                width={128}
-                height={128}
-                className="rounded-full object-cover"
+                fill
+                className="object-cover"
               />
             </div>
           ) : (

@@ -47,7 +47,7 @@ export default function ExerciseItem({
               alt={workoutExercise.exercise.name}
               width={40}
               height={40}
-              className="rounded-[8px] object-cover"
+              className="rounded-[8px]"
             />
           ) : (
             <div className="flex h-10 w-10 items-center justify-center rounded-[8px] bg-[#1a1a1a]">

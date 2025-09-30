@@ -113,9 +113,8 @@ export default function AlunosTable({
                         <Image
                           src={aluno.avatar}
                           alt={aluno.name}
-                          width={32}
-                          height={32}
-                          className="rounded-full object-cover"
+                          fill
+                          className="object-cover"
                         />
                       </div>
                     ) : (
@@ -166,9 +165,20 @@ export default function AlunosTable({
             {/* Header with avatar and name */}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-indigo-500 text-sm font-medium text-white">
-                  {getInitials(aluno.name)}
-                </div>
+                {aluno.avatar ? (
+                  <div className="relative h-10 w-10 overflow-hidden rounded-full">
+                    <Image
+                      src={aluno.avatar}
+                      alt={aluno.name}
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                ) : (
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-indigo-500 text-sm font-medium text-white">
+                    {getInitials(aluno.name)}
+                  </div>
+                )}
                 <div>
                   <h3 className="font-medium text-white">{aluno.name}</h3>
                   <p className="text-sm text-white/70">
