@@ -6,11 +6,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Loader2 } from "lucide-react";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPrevPassword, setShowPrevPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const router = useRouter();
@@ -61,7 +62,7 @@ export default function LoginPage() {
           <div className="flex flex-col items-center gap-4">
             <div className="relative">
               {/* Outer spinning ring */}
-              <div className="h-20 w-20 animate-spin rounded-full border-4 border-primary/20 border-t-primary"></div>
+              <div className="border-primary/20 border-t-primary h-20 w-20 animate-spin rounded-full border-4"></div>
               {/* Inner pulsing circle */}
               <div className="absolute inset-0 flex items-center justify-center">
                 <div className="h-12 w-12 animate-pulse rounded-full bg-white/20"></div>
@@ -118,16 +119,30 @@ export default function LoginPage() {
               >
                 Sua senha
               </Label>
-              <Input
-                id="password"
-                name="password"
-                type="password"
-                required
-                placeholder="Senha"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                disabled={isLoading}
-              />
+              <div className="relative">
+                <Input
+                  id="password"
+                  name="password"
+                  type={showPrevPassword ? "text" : "password"}
+                  required
+                  placeholder="Senha"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  disabled={isLoading}
+                />
+                <button
+                  type="button"
+                  className="absolute top-1/2 right-2 -translate-y-1/2 text-gray-400 hover:text-gray-200"
+                  tabIndex={-1}
+                  onClick={() => setShowPrevPassword((v) => !v)}
+                >
+                  {showPrevPassword ? (
+                    <EyeOff className="h-5 w-5" />
+                  ) : (
+                    <Eye className="h-5 w-5" />
+                  )}
+                </button>
+              </div>
             </div>
           </div>
 
