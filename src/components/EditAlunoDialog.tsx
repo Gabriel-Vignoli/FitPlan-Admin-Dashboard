@@ -63,7 +63,9 @@ export default function EditAlunoDialog({ student, onStudentUpdated }: EditAluno
     paymentStatus: student.paymentStatus || "PENDING",
   });
 
-  // Payment status options with Portuguese labels
+  const [originalData, setOriginalData] = useState(formData);
+  const [hasChanges, setHasChanges] = useState(false);
+
   const paymentStatusOptions = [
     { value: 'PENDING', label: 'Aguardando confirmação' },
     { value: 'PAID', label: 'Pagamento confirmado' },
@@ -76,25 +78,58 @@ export default function EditAlunoDialog({ student, onStudentUpdated }: EditAluno
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
-  // Reset form data when student changes
   useEffect(() => {
-    setFormData({
-      name: student.name || "",
-      email: student.email || "",
-      password: student.password || "",
-      phone: student.phone || "",
-      birthDate: student.birthDate ? new Date(student.birthDate).toISOString().split('T')[0] : "",
-      cpf: student.cpf || "",
-      height: student.height?.toString() || "",
-      weight: student.weight?.toString() || "",
-      bodyFat: student.bodyFat?.toString() || "",
-      isActive: student.isActive,
-      planId: student.planId || "",
-      paymentStatus: student.paymentStatus || "PENDING",
-    });
-  }, [student]);
+    if (open) {
+      const initial = {
+        name: student.name || "",
+        email: student.email || "",
+        password: student.password || "",
+        phone: student.phone || "",
+        birthDate: student.birthDate ? new Date(student.birthDate).toISOString().split('T')[0] : "",
+        cpf: student.cpf || "",
+        height: student.height?.toString() || "",
+        weight: student.weight?.toString() || "",
+        bodyFat: student.bodyFat?.toString() || "",
+        isActive: student.isActive,
+        planId: student.planId || "",
+        paymentStatus: student.paymentStatus || "PENDING",
+      };
+      setFormData(initial);
+      setOriginalData(initial);
+      setHasChanges(false);
+    }
+  }, [open, student]);
 
-  // Fetch available plans
+  useEffect(() => {
+    const nameChanged = formData.name.trim() !== originalData.name.trim();
+    const emailChanged = formData.email.trim() !== originalData.email.trim();
+    const passwordChanged = formData.password !== originalData.password;
+    const phoneChanged = formData.phone !== originalData.phone;
+    const birthDateChanged = formData.birthDate !== originalData.birthDate;
+    const cpfChanged = formData.cpf !== originalData.cpf;
+    const heightChanged = formData.height !== originalData.height;
+    const weightChanged = formData.weight !== originalData.weight;
+    const bodyFatChanged = formData.bodyFat !== originalData.bodyFat;
+    const isActiveChanged = formData.isActive !== originalData.isActive;
+    const planIdChanged = formData.planId !== originalData.planId;
+    const paymentStatusChanged = formData.paymentStatus !== originalData.paymentStatus;
+
+    setHasChanges(
+      nameChanged ||
+      emailChanged ||
+      passwordChanged ||
+      phoneChanged ||
+      birthDateChanged ||
+      cpfChanged ||
+      heightChanged ||
+      weightChanged ||
+      bodyFatChanged ||
+      isActiveChanged ||
+      planIdChanged ||
+      paymentStatusChanged
+    );
+  }, [formData, originalData]);
+
   useEffect(() => {
     const fetchPlans = async () => {
       try {
@@ -138,7 +173,6 @@ export default function EditAlunoDialog({ student, onStudentUpdated }: EditAluno
     setSuccess("");
 
     try {
-      // Prepare data for submission
       const submitData = {
         ...formData,
         height: formData.height ? parseFloat(formData.height) : null,
@@ -429,7 +463,7 @@ export default function EditAlunoDialog({ student, onStudentUpdated }: EditAluno
             </Button>
             <Button
               type="submit"
-              disabled={isLoading || isLoadingPlans}
+              disabled={isLoading || isLoadingPlans || !hasChanges}
               variant="secondary"
               className="flex-1"
             >

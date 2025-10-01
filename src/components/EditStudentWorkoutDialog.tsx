@@ -68,7 +68,6 @@ interface EditStudentWorkoutDialogProps {
   studentWorkout: StudentWorkout;
 }
 
-// Helper function to convert number to day name
 const formatNumberToDay = (dayNumber: number): string => {
   const days = [
     "",
@@ -94,23 +93,42 @@ export default function EditStudentWorkoutDialog({
   const [searchTerm, setSearchTerm] = useState("");
   const [showWorkoutSelector, setShowWorkoutSelector] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [hasChanges, setHasChanges] = useState(false);
 
-  // Store day as string for form display, convert to number when submitting
   const [formData, setFormData] = useState({
     dayOfWeek: formatNumberToDay(studentWorkout.dayOfWeek),
+  });
+
+  const [originalData, setOriginalData] = useState({
+    dayOfWeek: formatNumberToDay(studentWorkout.dayOfWeek),
+    workoutId: studentWorkout.workoutId,
   });
 
   const [selectedWorkout, setSelectedWorkout] = useState<Workout | null>(null);
 
   useEffect(() => {
     if (open) {
+      const initialDay = formatNumberToDay(studentWorkout.dayOfWeek);
       setFormData({
-        dayOfWeek: formatNumberToDay(studentWorkout.dayOfWeek),
+        dayOfWeek: initialDay,
+      });
+      setOriginalData({
+        dayOfWeek: initialDay,
+        workoutId: studentWorkout.workoutId,
       });
       setSelectedWorkout(studentWorkout.workout);
       setError(null);
+      setHasChanges(false);
     }
   }, [open, studentWorkout]);
+
+  // Detect changes
+  useEffect(() => {
+    const dayChanged = formData.dayOfWeek !== originalData.dayOfWeek;
+    const workoutChanged = selectedWorkout?.id !== originalData.workoutId;
+
+    setHasChanges(dayChanged || workoutChanged);
+  }, [formData.dayOfWeek, selectedWorkout, originalData]);
 
   useEffect(() => {
     if (open && availableWorkouts.length === 0) {
@@ -482,7 +500,7 @@ export default function EditStudentWorkoutDialog({
             <Button
               type="submit"
               disabled={
-                loading || !selectedWorkout || !formData.dayOfWeek.trim()
+                loading || !selectedWorkout || !formData.dayOfWeek.trim() || !hasChanges
               }
               variant="secondary"
               className="flex-1 rounded-[8px]"

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -37,6 +37,36 @@ export default function EditPlanDialog({ plan, onPlanUpdated }: EditPlanDialogPr
     description: plan.description,
     duration: plan.duration.toString(),
   });
+  const [originalData, setOriginalData] = useState({
+    name: plan.name,
+    price: plan.price.toString(),
+    description: plan.description,
+    duration: plan.duration.toString(),
+  });
+  const [hasChanges, setHasChanges] = useState(false);
+
+  useEffect(() => {
+    if (open) {
+      const initial = {
+        name: plan.name,
+        price: plan.price.toString(),
+        description: plan.description,
+        duration: plan.duration.toString(),
+      };
+      setFormData(initial);
+      setOriginalData(initial);
+      setHasChanges(false);
+    }
+  }, [open, plan]);
+
+  useEffect(() => {
+    const nameChanged = formData.name.trim() !== originalData.name.trim();
+    const priceChanged = formData.price !== originalData.price;
+    const descriptionChanged = formData.description.trim() !== originalData.description.trim();
+    const durationChanged = formData.duration !== originalData.duration;
+
+    setHasChanges(nameChanged || priceChanged || descriptionChanged || durationChanged);
+  }, [formData, originalData]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -177,7 +207,7 @@ export default function EditPlanDialog({ plan, onPlanUpdated }: EditPlanDialogPr
             </Button>
             <Button
               type="submit"
-              disabled={loading}
+              disabled={loading || !hasChanges}
               variant="secondary"
               className="flex-1"
             >

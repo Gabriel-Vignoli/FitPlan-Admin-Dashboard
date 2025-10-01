@@ -42,6 +42,7 @@ export default function EditExerciseDialog({
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [removeOriginalImage, setRemoveOriginalImage] = useState(false);
+  const [hasChanges, setHasChanges] = useState(false);
 
   useEffect(() => {
     if (open && exercise) {
@@ -55,6 +56,14 @@ export default function EditExerciseDialog({
       setError(null);
     }
   }, [open, exercise]);
+
+  useEffect(() => {
+    const nameChanged = formData.name.trim() !== exercise.name;
+    const muscleChanged = formData.targetMuscle.trim() !== exercise.targetMuscle;
+    const imageChanged = imageFile !== null || removeOriginalImage;
+
+    setHasChanges(nameChanged || muscleChanged || imageChanged);
+  }, [formData.name, formData.targetMuscle, imageFile, removeOriginalImage, exercise.name, exercise.targetMuscle]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -122,8 +131,6 @@ export default function EditExerciseDialog({
 
   const removeImage = () => {
     setImageFile(null);
-    // If there's a new image file, reset to original image
-    // If we're showing the original image, remove it completely
     if (imageFile) {
       setImagePreview(exercise.imageUrl || null);
     } else {
@@ -256,7 +263,7 @@ export default function EditExerciseDialog({
                 )}
               </Label>
 
-              {/* Alert message for video upload unavailability */}
+              {/* Alert message */}
               <div className="rounded-lg border border-yellow-500/30 bg-yellow-500/10 p-3 backdrop-blur-sm">
                 <p className="flex items-center text-sm text-yellow-400">
                   <AlertCircle className="mr-2 h-4 w-4 flex-shrink-0" />
@@ -298,7 +305,7 @@ export default function EditExerciseDialog({
             </Button>
             <Button
               type="submit"
-              disabled={loading || !formData.name || !formData.targetMuscle}
+              disabled={loading || !formData.name || !formData.targetMuscle || !hasChanges}
               variant="secondary"
               className="flex-1"
             >

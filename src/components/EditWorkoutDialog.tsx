@@ -68,8 +68,14 @@ export default function EditWorkoutDialog({
   const [availableExercises, setAvailableExercises] = useState<Exercise[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [showExerciseSelector, setShowExerciseSelector] = useState(false);
+  const [hasChanges, setHasChanges] = useState(false);
 
   const [formData, setFormData] = useState({
+    title: workout.title,
+    description: workout.description,
+  });
+
+  const [originalData, setOriginalData] = useState({
     title: workout.title,
     description: workout.description,
   });
@@ -78,16 +84,19 @@ export default function EditWorkoutDialog({
     WorkoutExerciseData[]
   >([]);
 
-  // Initialize form data and selected exercises when dialog opens
+  const [originalExercises, setOriginalExercises] = useState<
+    WorkoutExerciseData[]
+  >([]);
+
   useEffect(() => {
     if (open) {
-      // Initialize form data
-      setFormData({
+      const initialFormData = {
         title: workout.title,
         description: workout.description,
-      });
+      };
+      setFormData(initialFormData);
+      setOriginalData(initialFormData);
 
-      // Initialize selected exercises from the existing workout
       const workoutExercises = workout.exercises.map((workoutExercise) => ({
         exerciseId: workoutExercise.exerciseId,
         exercise: workoutExercise.exercise,
@@ -99,8 +108,32 @@ export default function EditWorkoutDialog({
       }));
 
       setSelectedExercises(workoutExercises);
+      setOriginalExercises(workoutExercises);
+      setHasChanges(false);
     }
   }, [open, workout]);
+
+  useEffect(() => {
+    const titleChanged = formData.title.trim() !== originalData.title.trim();
+    const descriptionChanged = formData.description.trim() !== originalData.description.trim();
+    
+    const exercisesChanged = 
+      selectedExercises.length !== originalExercises.length ||
+      selectedExercises.some((exercise, index) => {
+        const original = originalExercises[index];
+        if (!original || exercise.exerciseId !== original.exerciseId) return true;
+        
+        return (
+          exercise.sets !== original.sets ||
+          exercise.reps !== original.reps ||
+          (exercise.weight || "") !== (original.weight || "") ||
+          (exercise.rest || "") !== (original.rest || "") ||
+          (exercise.notes || "") !== (original.notes || "")
+        );
+      });
+
+    setHasChanges(titleChanged || descriptionChanged || exercisesChanged);
+  }, [formData, selectedExercises, originalData, originalExercises]);
 
   useEffect(() => {
     if (open && availableExercises.length === 0) {
@@ -445,7 +478,7 @@ export default function EditWorkoutDialog({
             </Button>
             <Button
               type="submit"
-              disabled={loading || selectedExercises.length === 0}
+              disabled={loading || selectedExercises.length === 0 || !hasChanges}
               variant="secondary"
               className="flex-1"
             >
