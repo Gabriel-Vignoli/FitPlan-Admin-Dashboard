@@ -61,7 +61,7 @@ export default function LoginPage() {
           <div className="flex flex-col items-center gap-4">
             <div className="relative">
               {/* Outer spinning ring */}
-              <div className="h-20 w-20 animate-spin rounded-full border-4 border-gray-700 border-t-white"></div>
+              <div className="h-20 w-20 animate-spin rounded-full border-4 border-primary/20 border-t-primary"></div>
               {/* Inner pulsing circle */}
               <div className="absolute inset-0 flex items-center justify-center">
                 <div className="h-12 w-12 animate-pulse rounded-full bg-white/20"></div>

@@ -502,18 +502,25 @@ export default function EditAdminProfileForm({ admin }: AdminProfileProps) {
               </div>
             </div>
 
-            {loading && (
-              <div className="absolute inset-0 flex items-center justify-center rounded-[8px] bg-[#18181b]/80 backdrop-blur-sm">
-                <div className="rounded-lg bg-[#23272f] p-6 shadow-xl">
-                  <div className="flex items-center gap-4">
-                    <div className="border-primary/30 border-t-primary h-8 w-8 animate-spin rounded-full border-2" />
-                    <span className="text-lg font-medium text-white">
-                      Processando...
-                    </span>
-                  </div>
-                </div>
+                 {/* Loading Overlay */}
+      {loading && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+          <div className="flex flex-col items-center gap-4">
+            <div className="relative">
+              {/* Outer spinning ring */}
+              <div className="h-20 w-20 animate-spin rounded-full border-4 border-primary/20 border-t-primary"></div>
+              {/* Inner pulsing circle */}
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="h-12 w-12 animate-pulse rounded-full bg-white/20"></div>
               </div>
-            )}
+            </div>
+            <div className="text-center">
+              <p className="text-lg font-semibold text-white">Alterando Dados...</p>
+              <p className="text-sm text-gray-400">Aguarde um momento</p>
+            </div>
+          </div>
+        </div>
+      )}
           </form>
         </div>
       </div>
