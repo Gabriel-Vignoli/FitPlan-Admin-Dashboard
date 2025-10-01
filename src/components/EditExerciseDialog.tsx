@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { Edit, ImageIcon, Upload, Video, X } from "lucide-react";
+import { Edit, ImageIcon, Upload, Video, X, AlertCircle } from "lucide-react";
 import { Button } from "./ui/button";
 import Image from "next/image";
 
@@ -40,7 +40,6 @@ export default function EditExerciseDialog({
     targetMuscle: "",
   });
   const [imageFile, setImageFile] = useState<File | null>(null);
-  const [videoFile, setVideoFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [removeOriginalImage, setRemoveOriginalImage] = useState(false);
 
@@ -52,7 +51,6 @@ export default function EditExerciseDialog({
       });
       setImagePreview(exercise.imageUrl || null);
       setImageFile(null);
-      setVideoFile(null);
       setRemoveOriginalImage(false);
       setError(null);
     }
@@ -70,10 +68,6 @@ export default function EditExerciseDialog({
 
       if (imageFile) {
         formDataToSend.append("image", imageFile);
-      }
-
-      if (videoFile) {
-        formDataToSend.append("video", videoFile);
       }
 
       if (removeOriginalImage) {
@@ -126,13 +120,6 @@ export default function EditExerciseDialog({
     }
   };
 
-  const handleVideoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setVideoFile(file);
-    }
-  };
-
   const removeImage = () => {
     setImageFile(null);
     // If there's a new image file, reset to original image
@@ -143,10 +130,6 @@ export default function EditExerciseDialog({
       setImagePreview(null);
       setRemoveOriginalImage(true);
     }
-  };
-
-  const removeVideo = () => {
-    setVideoFile(null);
   };
 
   return (
@@ -273,50 +256,32 @@ export default function EditExerciseDialog({
                 )}
               </Label>
 
-              {videoFile ? (
-                <div className="flex items-center justify-between rounded-lg border border-white/20 bg-white/5 p-3">
-                  <div className="flex items-center space-x-3">
-                    <Video className="h-5 w-5 text-blue-400" />
-                    <div>
-                      <p className="text-sm font-medium text-white">
-                        {videoFile.name}
-                      </p>
-                      <p className="text-xs text-gray-400">
-                        {(videoFile.size / (1024 * 1024)).toFixed(2)} MB
-                      </p>
-                    </div>
-                  </div>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={removeVideo}
-                    className="text-red-400 hover:bg-red-500/10 hover:text-red-300"
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
-                </div>
-              ) : (
-                <div className="relative">
-                  <Input
-                    type="file"
-                    accept="video/*"
-                    onChange={handleVideoChange}
-                    className="hidden"
-                    id="video-upload"
-                  />
-                  <Label
-                    htmlFor="video-upload"
-                    className="flex h-32 w-full cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-white/20 bg-white/5 hover:bg-white/10"
-                  >
-                    <Upload className="mb-2 h-8 w-8 text-gray-400" />
-                    <p className="text-sm text-gray-400">
-                      Clique para selecionar um vídeo
-                      {exercise.videoUrl && " (substituirá o atual)"}
-                    </p>
-                  </Label>
-                </div>
-              )}
+              {/* Alert message for video upload unavailability */}
+              <div className="rounded-lg border border-yellow-500/30 bg-yellow-500/10 p-3 backdrop-blur-sm">
+                <p className="flex items-center text-sm text-yellow-400">
+                  <AlertCircle className="mr-2 h-4 w-4 flex-shrink-0" />
+                  Upload de vídeos temporariamente indisponível
+                </p>
+              </div>
+
+              <div className="relative pointer-events-none opacity-50">
+                <Input
+                  type="file"
+                  accept="video/*"
+                  className="hidden"
+                  id="video-upload"
+                  disabled
+                />
+                <Label
+                  htmlFor="video-upload"
+                  className="flex h-32 w-full cursor-not-allowed flex-col items-center justify-center rounded-lg border-2 border-dashed border-white/20 bg-white/5"
+                >
+                  <Upload className="mb-2 h-8 w-8 text-gray-400" />
+                  <p className="text-sm text-gray-400">
+                    Upload de vídeos indisponível
+                  </p>
+                </Label>
+              </div>
             </div>
           </div>
 

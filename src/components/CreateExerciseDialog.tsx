@@ -11,7 +11,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from "./ui/button";
-import { Plus, Upload, X, Image as ImageIcon, Video } from "lucide-react";
+import { Plus, Upload, X, Image as ImageIcon, Video, AlertCircle } from "lucide-react";
 import { Label } from "./ui/label";
 import { Input } from "./ui/input";
 
@@ -155,10 +155,6 @@ export default function CreateExerciseDialog({
     setImageError(null);
   };
 
-  const removeVideo = () => {
-    setVideoFile(null);
-  };
-
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
@@ -290,49 +286,33 @@ export default function CreateExerciseDialog({
                 Vídeo do Exercício
               </Label>
 
-              {videoFile ? (
-                <div className="flex items-center justify-between rounded-lg border border-white/20 bg-white/5 p-3">
-                  <div className="flex items-center space-x-3">
-                    <Video className="h-5 w-5 text-blue-400" />
-                    <div>
-                      <p className="text-sm font-medium text-white">
-                        {videoFile.name}
-                      </p>
-                      <p className="text-xs text-gray-400">
-                        {(videoFile.size / (1024 * 1024)).toFixed(2)} MB
-                      </p>
-                    </div>
-                  </div>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={removeVideo}
-                    className="text-red-400 hover:bg-red-500/10 hover:text-red-300"
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
-                </div>
-              ) : (
-                <div className="relative">
-                  <Input
-                    type="file"
-                    accept="video/*"
-                    onChange={handleVideoChange}
-                    className="hidden"
-                    id="video-upload"
-                  />
-                  <Label
-                    htmlFor="video-upload"
-                    className="flex h-32 w-full cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-white/20 bg-white/5 hover:bg-white/10"
-                  >
-                    <Upload className="mb-2 h-8 w-8 text-gray-400" />
-                    <p className="text-sm text-gray-400">
-                      Clique para selecionar um vídeo
-                    </p>
-                  </Label>
-                </div>
-              )}
+              {/* Alert message for video upload unavailability */}
+              <div className="rounded-lg border border-yellow-500/30 bg-yellow-500/10 p-3 backdrop-blur-sm">
+                <p className="flex items-center text-sm text-yellow-400">
+                  <AlertCircle className="mr-2 h-4 w-4 flex-shrink-0" />
+                  Upload de vídeos temporariamente indisponível
+                </p>
+              </div>
+
+              <div className="relative pointer-events-none opacity-50">
+                <Input
+                  type="file"
+                  accept="video/*"
+                  onChange={handleVideoChange}
+                  className="hidden"
+                  id="video-upload"
+                  disabled
+                />
+                <Label
+                  htmlFor="video-upload"
+                  className="flex h-32 w-full cursor-not-allowed flex-col items-center justify-center rounded-lg border-2 border-dashed border-white/20 bg-white/5"
+                >
+                  <Upload className="mb-2 h-8 w-8 text-gray-400" />
+                  <p className="text-sm text-gray-400">
+                    Upload de vídeos indisponível
+                  </p>
+                </Label>
+              </div>
             </div>
           </div>
 
