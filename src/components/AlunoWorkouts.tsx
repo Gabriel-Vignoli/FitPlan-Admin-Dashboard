@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import AddWorkoutToAlunoDialog from "./AddWorkoutToAlunoDialog";
 import EditStudentWorkoutDialog from "./EditStudentWorkoutDialog";
 import ExerciseItem from "./ExerciseItem";
+import DeleteButton from "./DeleteButton";
 
 interface Exercise {
   id: string;
@@ -105,6 +106,12 @@ export default function AlunoWorkouts({
     );
   };
 
+  const handleWorkoutDeleted = (deletedId: string) => {
+  setWorkouts((prevWorkouts) =>
+    prevWorkouts.filter((workout) => workout.id !== deletedId),
+  );
+};
+
   if (loading) {
     return (
       <div className="mt-8 w-full max-w-4xl">
@@ -179,18 +186,15 @@ export default function AlunoWorkouts({
                   )}
                 </div>
                 <div className="flex items-center gap-2">
-                  <span
-                    className={`rounded-full px-3 py-1 text-xs font-medium md:text-sm ${
-                      studentWorkout.isActive
-                        ? "bg-green-500/20 text-green-400"
-                        : "bg-red-500/20 text-red-400"
-                    }`}
-                  >
-                    {studentWorkout.isActive ? "Ativo" : "Inativo"}
-                  </span>
                   <EditStudentWorkoutDialog
                     studentWorkout={studentWorkout}
                     onWorkoutUpdated={handleWorkoutUpdated}
+                  />
+                  <DeleteButton
+                    id={studentWorkout.id}
+                    endpoint={`/api/alunos/${id}/workouts`}
+                    itemName="treino"
+                    onDeleted={handleWorkoutDeleted}
                   />
                 </div>
               </div>
