@@ -4,7 +4,17 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Camera, User, Mail, Lock, Check, AlertCircle } from "lucide-react";
+import {
+  Camera,
+  User,
+  Mail,
+  Lock,
+  Check,
+  AlertCircle,
+  Eye,
+  EyeOff,
+} from "lucide-react";
+import { isValidEmail } from "@/lib/utils/validations";
 import { useRouter } from "next/navigation";
 
 interface AdminProfileProps {
@@ -25,7 +35,15 @@ interface ToastState {
 export default function EditAdminProfileForm({ admin }: AdminProfileProps) {
   const [name, setName] = useState(admin.name);
   const [email, setEmail] = useState(admin.email);
-  const [password, setPassword] = useState("");
+  const [prevPassword, setPrevPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPrevPassword, setShowPrevPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [prevPasswordValid, setPrevPasswordValid] = useState<null | boolean>(
+    null,
+  );
   const [avatarPreview, setAvatarPreview] = useState<string | undefined>(
     admin.avatar,
   );
@@ -44,13 +62,25 @@ export default function EditAdminProfileForm({ admin }: AdminProfileProps) {
   useEffect(() => {
     const nameChanged = name.trim() !== admin.name;
     const emailChanged = email.trim() !== admin.email;
-    const passwordChanged = password.length > 0;
+    const passwordChanged =
+      newPassword.length > 0 ||
+      prevPassword.length > 0 ||
+      confirmPassword.length > 0;
     const avatarChanged = avatarFile !== null;
 
     setHasChanges(
       nameChanged || emailChanged || passwordChanged || avatarChanged,
     );
-  }, [name, email, password, avatarFile, admin.name, admin.email]);
+  }, [
+    name,
+    email,
+    newPassword,
+    prevPassword,
+    confirmPassword,
+    avatarFile,
+    admin.name,
+    admin.email,
+  ]);
 
   const handleGoBack = () => {
     router.back();
@@ -68,14 +98,46 @@ export default function EditAdminProfileForm({ admin }: AdminProfileProps) {
     const newErrors: Record<string, string> = {};
     if (!name.trim()) newErrors.name = "Nome é obrigatório";
     if (!email.trim()) newErrors.email = "Email é obrigatório";
-    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
-      newErrors.email = "Email inválido";
-    if (password && password.length < 6)
-      newErrors.password = "Senha deve ter pelo menos 6 caracteres";
+    else if (!isValidEmail(email)) newErrors.email = "Email inválido";
+
+    // Password change validation
+    if (prevPassword || newPassword || confirmPassword) {
+      if (!prevPassword) newErrors.prevPassword = "Informe a senha atual";
+      else if (prevPasswordValid === false)
+        newErrors.prevPassword = "Senha atual incorreta";
+      if (!newPassword) newErrors.newPassword = "Informe a nova senha";
+      else if (newPassword.length < 6)
+        newErrors.newPassword = "Nova senha deve ter pelo menos 6 caracteres";
+      if (!confirmPassword) newErrors.confirmPassword = "Confirme a nova senha";
+      else if (newPassword !== confirmPassword)
+        newErrors.confirmPassword = "Senhas não coincidem";
+    }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
+
+  // Validate previous password when it changes
+  useEffect(() => {
+    if (prevPassword.length > 0) {
+      const timeout = setTimeout(async () => {
+        try {
+          const res = await fetch("/api/admin/profile/check-password", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ password: prevPassword }),
+          });
+          const data = await res.json();
+          setPrevPasswordValid(data.valid === true);
+        } catch {
+          setPrevPasswordValid(null);
+        }
+      }, 500);
+      return () => clearTimeout(timeout);
+    } else {
+      setPrevPasswordValid(null);
+    }
+  }, [prevPassword]);
 
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -101,7 +163,11 @@ export default function EditAdminProfileForm({ admin }: AdminProfileProps) {
       const formData = new FormData();
       formData.append("name", name.trim());
       formData.append("email", email.trim());
-      if (password) formData.append("password", password);
+      if (prevPassword && newPassword && confirmPassword) {
+        formData.append("prevPassword", prevPassword);
+        formData.append("newPassword", newPassword);
+        formData.append("confirmPassword", confirmPassword);
+      }
       if (avatarFile) formData.append("avatar", avatarFile);
 
       const res = await fetch("/api/admin/profile", {
@@ -165,7 +231,7 @@ export default function EditAdminProfileForm({ admin }: AdminProfileProps) {
                 <div className="mb-6 flex flex-col items-center gap-6">
                   <div className="group relative">
                     <div
-                      className="relative h-40 w-40 overflow-hidden rounded-full border-4 border-gray-200 bg-indigo-600 cursor-pointer"
+                      className="relative h-40 w-40 cursor-pointer overflow-hidden rounded-full border-4 border-gray-200 bg-indigo-600"
                       onClick={() => fileInputRef.current?.click()} // clique na imagem também
                     >
                       <Image
@@ -268,32 +334,140 @@ export default function EditAdminProfileForm({ admin }: AdminProfileProps) {
 
                 <div className="space-y-3">
                   <Label
-                    htmlFor="password"
+                    htmlFor="prevPassword"
+                    className="flex items-center gap-2 text-base font-medium text-white"
+                  >
+                    <Lock className="h-5 w-5" />
+                    Senha Atual
+                  </Label>
+                  <div className="relative">
+                    <Input
+                      id="prevPassword"
+                      type={showPrevPassword ? "text" : "password"}
+                      value={prevPassword}
+                      onChange={(e) => {
+                        setPrevPassword(e.target.value);
+                        if (errors.prevPassword)
+                          setErrors((prev) => ({ ...prev, prevPassword: "" }));
+                      }}
+                      className="border pr-10"
+                      placeholder="Digite sua senha atual"
+                    />
+                    <button
+                      type="button"
+                      className="absolute top-1/2 right-2 -translate-y-1/2 text-gray-400 hover:text-gray-200"
+                      tabIndex={-1}
+                      onClick={() => setShowPrevPassword((v) => !v)}
+                    >
+                      {showPrevPassword ? (
+                        <EyeOff className="h-5 w-5" />
+                      ) : (
+                        <Eye className="h-5 w-5" />
+                      )}
+                    </button>
+                  </div>
+                  {errors.prevPassword && (
+                    <p className="flex items-center gap-1 text-sm text-red-400">
+                      <AlertCircle className="h-4 w-4" />
+                      {errors.prevPassword}
+                    </p>
+                  )}
+                  {prevPassword &&
+                    prevPasswordValid === true &&
+                    !errors.prevPassword && (
+                      <p className="flex items-center gap-1 text-sm text-emerald-400">
+                        <Check className="h-4 w-4" /> Senha correta
+                      </p>
+                    )}
+                </div>
+
+                <div className="space-y-3">
+                  <Label
+                    htmlFor="newPassword"
                     className="flex items-center gap-2 text-base font-medium text-white"
                   >
                     <Lock className="h-5 w-5" />
                     Nova Senha
                   </Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    value={password}
-                    onChange={(e) => {
-                      setPassword(e.target.value);
-                      if (errors.password)
-                        setErrors((prev) => ({ ...prev, password: "" }));
-                    }}
-                    className="border"
-                    placeholder="Deixe em branco para manter a atual"
-                  />
-                  {errors.password && (
+                  <div className="relative">
+                    <Input
+                      id="newPassword"
+                      type={showNewPassword ? "text" : "password"}
+                      value={newPassword}
+                      onChange={(e) => {
+                        setNewPassword(e.target.value);
+                        if (errors.newPassword)
+                          setErrors((prev) => ({ ...prev, newPassword: "" }));
+                      }}
+                      className="border pr-10"
+                      placeholder="Digite a nova senha"
+                    />
+                    <button
+                      type="button"
+                      className="absolute top-1/2 right-2 -translate-y-1/2 text-gray-400 hover:text-gray-200"
+                      tabIndex={-1}
+                      onClick={() => setShowNewPassword((v) => !v)}
+                    >
+                      {showNewPassword ? (
+                        <EyeOff className="h-5 w-5" />
+                      ) : (
+                        <Eye className="h-5 w-5" />
+                      )}
+                    </button>
+                  </div>
+                  {errors.newPassword && (
                     <p className="flex items-center gap-1 text-sm text-red-400">
                       <AlertCircle className="h-4 w-4" />
-                      {errors.password}
+                      {errors.newPassword}
                     </p>
                   )}
-                  {!errors.password && password && (
+                  {!errors.newPassword && newPassword && (
                     <p className="text-sm text-gray-400">Mínimo 6 caracteres</p>
+                  )}
+                </div>
+
+                <div className="space-y-3">
+                  <Label
+                    htmlFor="confirmPassword"
+                    className="flex items-center gap-2 text-base font-medium text-white"
+                  >
+                    <Lock className="h-5 w-5" />
+                    Confirmar Nova Senha
+                  </Label>
+                  <div className="relative">
+                    <Input
+                      id="confirmPassword"
+                      type={showConfirmPassword ? "text" : "password"}
+                      value={confirmPassword}
+                      onChange={(e) => {
+                        setConfirmPassword(e.target.value);
+                        if (errors.confirmPassword)
+                          setErrors((prev) => ({
+                            ...prev,
+                            confirmPassword: "",
+                          }));
+                      }}
+                      className="border pr-10"
+                      placeholder="Confirme a nova senha"
+                    />
+                    <button
+                      type="button"
+                      className="absolute top-1/2 right-2 -translate-y-1/2 text-gray-400 hover:text-gray-200"
+                      tabIndex={-1}
+                      onClick={() => setShowConfirmPassword((v) => !v)}
+                    >
+                      {showConfirmPassword ? (
+                        <EyeOff className="h-5 w-5" />
+                      ) : (
+                        <Eye className="h-5 w-5" />
+                      )}
+                    </button>
+                  </div>
+                  {errors.confirmPassword && (
+                    <p className="flex items-center gap-1 text-sm text-red-400">
+                      <AlertCircle className="h-4 w-4" />
+                      {errors.confirmPassword}
+                    </p>
                   )}
                 </div>
 

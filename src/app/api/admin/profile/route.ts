@@ -3,12 +3,12 @@ import { prisma } from "@/lib/prisma";
 import s3Client from "../../../../../config/aws";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { cookies } from "next/headers";
-import { verifyToken } from "@/lib/auth"; 
+import { verifyToken } from "@/lib/auth";
 import { v4 as uuidv4 } from "uuid";
 
 export async function POST(request: NextRequest) {
   try {
-    // Get auth token from cookies 
+    // Get auth token from cookies
     const cookieStore = await cookies();
     const token = cookieStore.get("auth-token")?.value;
 
@@ -37,7 +37,11 @@ export async function POST(request: NextRequest) {
     const formData = await request.formData();
     const name = formData.get("name") as string;
     const email = formData.get("email") as string;
-    const password = formData.get("password") as string | undefined;
+    const prevPassword = formData.get("prevPassword") as string | undefined;
+    const newPassword = formData.get("newPassword") as string | undefined;
+    const confirmPassword = formData.get("confirmPassword") as
+      | string
+      | undefined;
     const avatarFile = formData.get("avatar") as File | null;
     let avatarUrl = admin.avatar;
 
@@ -57,11 +61,24 @@ export async function POST(request: NextRequest) {
       avatarUrl = `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/uploads/images/${fileName}`;
     }
 
-    // Hash password if provided
     let hashedPassword;
-    if (password) {
-      const { hashPassword } = await import("@/lib/auth");
-      hashedPassword = await hashPassword(password);
+    if (prevPassword && newPassword && confirmPassword) {
+      if (newPassword !== confirmPassword) {
+        return NextResponse.json(
+          { error: "Nova senha e confirmação não coincidem" },
+          { status: 400 },
+        );
+      }
+      // Validate previous password
+      const { comparePassword, hashPassword } = await import("@/lib/auth");
+      const isPrevValid = await comparePassword(prevPassword, admin.password);
+      if (!isPrevValid) {
+        return NextResponse.json(
+          { error: "Senha atual incorreta" },
+          { status: 401 },
+        );
+      }
+      hashedPassword = await hashPassword(newPassword);
     }
 
     // Update admin data
