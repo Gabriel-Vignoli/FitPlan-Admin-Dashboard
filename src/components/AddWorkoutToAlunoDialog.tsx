@@ -97,7 +97,7 @@ export default function AddWorkoutToAlunoDialog({
     setLoadingWorkouts(true);
     setFetchError(null);
     try {
-      const response = await fetch("/api/workouts");
+      const response = await fetch("/api/workouts?limit=all");
       if (!response.ok) {
         throw new Error(`Erro ao carregar treinos: ${response.status}`);
       }
