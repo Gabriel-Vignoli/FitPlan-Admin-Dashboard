@@ -8,7 +8,6 @@ import { v4 as uuidv4 } from "uuid";
 
 export async function POST(request: NextRequest) {
   try {
-    // Get auth token from cookies
     const cookieStore = await cookies();
     const token = cookieStore.get("auth-token")?.value;
 
@@ -22,7 +21,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Token inválido" }, { status: 401 });
     }
 
-    // Find admin using the ID from token
+  
     const admin = await prisma.admin.findUnique({
       where: { id: decoded.id },
     });
@@ -62,6 +61,9 @@ export async function POST(request: NextRequest) {
     }
 
     let hashedPassword;
+    let needsReauth = false;
+
+    // Check if password or email changed
     if (prevPassword && newPassword && confirmPassword) {
       if (newPassword !== confirmPassword) {
         return NextResponse.json(
@@ -79,9 +81,13 @@ export async function POST(request: NextRequest) {
         );
       }
       hashedPassword = await hashPassword(newPassword);
+      needsReauth = true;
     }
 
-    // Update admin data
+    if (email !== admin.email) {
+      needsReauth = true; 
+    }
+
     await prisma.admin.update({
       where: { id: admin.id },
       data: {
@@ -92,7 +98,16 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    return NextResponse.json({ success: true });
+    if (needsReauth) {
+      cookieStore.delete("auth-token");
+      return NextResponse.json({ 
+        success: true, 
+        needsReauth: true,
+        message: "Perfil atualizado. Por favor, faça login novamente com suas novas credenciais."
+      });
+    }
+
+    return NextResponse.json({ success: true, needsReauth: false });
   } catch (error) {
     console.error("Erro ao atualizar perfil do admin:", error);
     return NextResponse.json(
