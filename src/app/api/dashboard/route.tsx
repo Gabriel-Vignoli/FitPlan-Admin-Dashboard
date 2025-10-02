@@ -27,14 +27,18 @@ export async function GET() {
 
     const totalStudents = await prisma.student.count();
 
-    // Calculate total revenue from active students this month
+    // Calculate total revenue from active students
     const totalRevenueResult = (await prisma.$queryRaw`
-      SELECT SUM(p.price) as total_revenue
-      FROM "Student" s
-      JOIN "Plan" p ON s."planId" = p.id
-      WHERE s."isActive" = true
-      AND s."createdAt" >= ${thisMonthStart}
-    `) as [{ total_revenue: string | null }];
+    SELECT SUM(p.price) as total_revenue
+    FROM "Student" s
+    JOIN "Plan" p ON s."planId" = p.id
+    WHERE s."isActive" = true
+    AND (
+    (s."createdAt" >= ${thisMonthStart}) 
+    OR (s."updatedAt" >= ${thisMonthStart})
+    OR (p."updatedAt" >= ${thisMonthStart})
+  )
+`) as [{ total_revenue: string | null }];
 
     const totalRevenue = Number(totalRevenueResult[0]?.total_revenue) || 0;
 
