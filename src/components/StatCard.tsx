@@ -4,12 +4,14 @@ import React from "react";
 interface StatCardProps {
   title: string;
   value: string | number;
-  percentage: string;
+  percentage?: string;
   chartData?: Array<{ value: number }>;
   chartColor?: string;
   isPositive?: boolean;
   description?: string;
+  arrow?: boolean;
 }
+
 export default function StatCard(props: StatCardProps) {
   const {
     title,
@@ -17,7 +19,9 @@ export default function StatCard(props: StatCardProps) {
     percentage,
     isPositive = true,
     description,
+    arrow = true
   } = props;
+
   return (
     <div className="flex h-full flex-col rounded-[8px] bg-gradient-to-br from-[#18181b] to-[#17191d] p-4 shadow-lg backdrop-blur-md sm:p-6">
       <h3 className="mb-2 text-sm font-medium text-white/90 sm:mb-4 sm:text-base md:text-lg">
@@ -32,17 +36,21 @@ export default function StatCard(props: StatCardProps) {
             {description}
           </span>
         )}
-        <span
-          className={`flex items-center gap-1 text-xs font-medium sm:text-sm ${
-            isPositive ? "text-green-400" : "text-red-400"
-          }`}
-        >
-          <span className="text-sm sm:text-base">
-            {isPositive ? "↗" : "↘"}
-          </span>
-          {percentage.replace(/^\+?/, "")}
-        </span>
-        <span className="mt-1 text-xs text-gray-400 sm:text-sm">esse mês</span>
+        {arrow && percentage && (
+          <>
+            <span
+              className={`flex items-center gap-1 text-xs font-medium sm:text-sm ${
+                isPositive ? "text-green-400" : "text-red-400"
+              }`}
+            >
+              <span className="text-sm sm:text-base">
+                {isPositive ? "↗" : "↘"}
+              </span>
+              {percentage.replace(/^\+?/, "")}
+            </span>
+            <span className="mt-1 text-xs text-gray-400 sm:text-sm">esse mês</span>
+          </>
+        )}
       </div>
     </div>
   );

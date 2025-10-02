@@ -26,6 +26,13 @@ export async function GET() {
     });
 
     const totalStudents = await prisma.student.count();
+    
+    // Total students at the end of last month
+    const totalStudentsLastMonth = await prisma.student.count({
+      where: {
+        createdAt: { lt: thisMonthStart },
+      },
+    });
 
     // Calculate total revenue from active students
     const totalRevenueResult = (await prisma.$queryRaw`
@@ -55,13 +62,13 @@ export async function GET() {
     const lastMonthRevenue =
       Number(lastMonthRevenueResult[0]?.total_revenue) || 0;
 
-    // Calculate student change percentage
+    // Calculate student change percentage based on total students
     let changePercentage = 0;
-    if (studentsLastMonth === 0) {
-      changePercentage = studentsThisMonth > 0 ? 100 : 0;
+    if (totalStudentsLastMonth === 0) {
+      changePercentage = totalStudents > 0 ? 100 : 0;
     } else {
       changePercentage =
-        ((studentsThisMonth - studentsLastMonth) / studentsLastMonth) * 100;
+        ((totalStudents - totalStudentsLastMonth) / totalStudentsLastMonth) * 100;
     }
 
     // Calculate revenue change percentage
@@ -77,35 +84,42 @@ export async function GET() {
       return date.toISOString().split("T")[0];
     }
 
-    // 1. This month, every 3 days
+    // 1. This month, every day
     const thisMonthHistory = [];
-    for (
-      let d = new Date(thisMonthStart);
-      d <= today;
-      d.setDate(d.getDate() + 3)
-    ) {
-      const periodStart = new Date(d);
-      const periodEnd = new Date(periodStart);
-      periodEnd.setDate(periodEnd.getDate() + 2);
-      if (periodEnd > today) periodEnd.setTime(today.getTime());
+    const lastDayOfMonth = new Date(currentYear, currentMonthNumber + 1, 0); // Last day of current month
+    const endDate = today < lastDayOfMonth ? today : lastDayOfMonth; // Use today if month isn't over
+
+    const currentDate = new Date(thisMonthStart);
+    while (currentDate <= endDate) {
+      const periodStart = new Date(currentDate);
+      periodStart.setHours(0, 0, 0, 0); // Start of the day
+      
+      const periodEnd = new Date(currentDate);
+      periodEnd.setHours(23, 59, 59, 999); // End of the day
+      
       const newStudents = await prisma.student.count({
         where: {
           createdAt: {
             gte: periodStart,
-            lt: new Date(periodEnd.getTime() + 24 * 60 * 60 * 1000),
+            lte: periodEnd,
           },
         },
       });
+      
       const totalStudents = await prisma.student.count({
         where: {
           createdAt: { lte: periodEnd },
         },
       });
+      
       thisMonthHistory.push({
         date: formatDate(periodStart),
         totalStudents,
         newStudents,
       });
+      
+      // Move to next day
+      currentDate.setDate(currentDate.getDate() + 1);
     }
 
     // 2. Last 3 months, every 15 days
@@ -180,6 +194,7 @@ export async function GET() {
         current: studentsThisMonth,
         previous: studentsLastMonth,
         total: totalStudents,
+        totalLastMonth: totalStudentsLastMonth,
         changePercentage: Math.round(changePercentage),
       },
       revenue: {

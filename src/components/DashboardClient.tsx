@@ -11,6 +11,7 @@ interface DashboardData {
     current: number;
     previous: number;
     total: number;
+    totalLastMonth: number;
     changePercentage: number;
   };
   revenue: {
@@ -94,23 +95,57 @@ export default function DashboardClient() {
 
   return (
     <div className="flex flex-col gap-8">
-      {/* Stat Cards */}
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
+      {/* Current Month Stat Cards */}
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
         <StatCard
           title="Total de Alunos"
           value={dashboardData?.students?.total?.toString() || "0"}
-          percentage={`${dashboardData?.students?.changePercentage || 0}%`}
-          isPositive={(dashboardData?.students?.changePercentage || 0) >= 0}
+          percentage={`${
+            dashboardData?.students?.totalLastMonth &&
+            dashboardData?.students?.total &&
+            dashboardData.students.totalLastMonth > 0
+              ? Math.round(
+                  ((dashboardData.students.total -
+                    dashboardData.students.totalLastMonth) /
+                    dashboardData.students.totalLastMonth) *
+                    100,
+                )
+              : dashboardData?.students?.total &&
+                  dashboardData.students.total > 0
+                ? 100
+                : 0
+          }%`}
+          isPositive={
+            (dashboardData?.students?.total || 0) >
+            (dashboardData?.students?.totalLastMonth || 0)
+          }
           description="Crescimento de alunos este mês"
         />
         <StatCard
           title="Novos Alunos"
           value={dashboardData?.students?.current?.toString() || "0"}
-          percentage={`${dashboardData?.students?.changePercentage || 0}%`}
-          isPositive={(dashboardData?.students?.changePercentage || 0) >= 0}
+          percentage={`${
+            dashboardData?.students?.previous &&
+            dashboardData?.students?.current !== undefined &&
+            dashboardData.students.previous > 0
+              ? Math.round(
+                  ((dashboardData.students.current -
+                    dashboardData.students.previous) /
+                    dashboardData.students.previous) *
+                    100,
+                )
+              : dashboardData?.students?.current &&
+                  dashboardData.students.current > 0
+                ? 100
+                : 0
+          }%`}
+          isPositive={
+            (dashboardData?.students?.current || 0) >=
+            (dashboardData?.students?.previous || 0)
+          }
           description={
-            typeof dashboardData?.students?.changePercentage === "number" &&
-            dashboardData.students.changePercentage < 0
+            (dashboardData?.students?.current || 0) <
+            (dashboardData?.students?.previous || 0)
               ? "Atenção: queda de novos alunos"
               : "Novos alunos este mês"
           }
@@ -118,29 +153,31 @@ export default function DashboardClient() {
         <StatCard
           title="Receita"
           value={formatCurrency(dashboardData?.revenue?.current || 0)}
-          percentage={`${dashboardData?.revenue?.changePercentage || 0}%`}
-          isPositive={(dashboardData?.revenue?.changePercentage || 0) >= 0}
+          percentage={`${
+            dashboardData?.revenue?.previous &&
+            dashboardData?.revenue?.current !== undefined &&
+            dashboardData.revenue.previous > 0
+              ? Math.round(
+                  ((dashboardData.revenue.current -
+                    dashboardData.revenue.previous) /
+                    dashboardData.revenue.previous) *
+                    100,
+                )
+              : dashboardData?.revenue?.current &&
+                  dashboardData.revenue.current > 0
+                ? 100
+                : 0
+          }%`}
+          isPositive={
+            (dashboardData?.revenue?.current || 0) >=
+            (dashboardData?.revenue?.previous || 0)
+          }
           description={
-            typeof dashboardData?.revenue?.changePercentage === "number" &&
-            dashboardData.revenue.changePercentage < 0
+            (dashboardData?.revenue?.current || 0) <
+            (dashboardData?.revenue?.previous || 0)
               ? "Receita caiu este mês"
               : "Receita subiu este mês"
           }
-        />
-        <StatCard
-          title="Crescimento"
-          value={
-            dashboardData?.students?.changePercentage
-              ? `${dashboardData.students.changePercentage}%`
-              : "0%"
-          }
-          percentage={
-            dashboardData?.students?.changePercentage
-              ? `${dashboardData.students.changePercentage}%`
-              : "0%"
-          }
-          isPositive={(dashboardData?.students?.changePercentage || 0) >= 0}
-          description="Progresso em relação à meta"
         />
       </div>
 
@@ -155,7 +192,7 @@ export default function DashboardClient() {
               className={`px-3 py-1 font-medium text-white transition sm:px-4 ${selectedRange === "thisMonth" ? "bg-primary/80" : "bg-[#23272f] hover:bg-[#18181b]"}`}
               onClick={() => setSelectedRange("thisMonth")}
             >
-              Este mês (cada 3 dias)
+              Este mês (até ontem)
             </Button>
             <Button
               className={`px-3 py-1 font-medium text-white transition sm:px-4 ${selectedRange === "last3Months" ? "bg-primary/80" : "bg-[#23272f] hover:bg-[#18181b]"}`}
@@ -177,6 +214,31 @@ export default function DashboardClient() {
         >
           <MainChart data={chartData} />
         </div>
+      </div>
+
+      {/* Last Month Stat Cards - Without Percentages */}
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+        <StatCard
+          title="Novos Alunos (Mês Passado)"
+          value={dashboardData?.students?.previous?.toString() || "0"}
+          description="Total de novos alunos no mês anterior"
+        />
+        <StatCard
+          title="Diferença de Novos Alunos"
+          value={
+            (dashboardData?.students?.current || 0) -
+              (dashboardData?.students?.previous || 0) >=
+            0
+              ? `+${(dashboardData?.students?.current || 0) - (dashboardData?.students?.previous || 0)}`
+              : `${(dashboardData?.students?.current || 0) - (dashboardData?.students?.previous || 0)}`
+          }
+          description="Diferença entre este mês e o anterior"
+        />
+        <StatCard
+          title="Receita (Mês Passado)"
+          value={formatCurrency(dashboardData?.revenue?.previous || 0)}
+          description="Receita total do mês anterior"
+        />
       </div>
     </div>
   );
