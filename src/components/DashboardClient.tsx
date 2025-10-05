@@ -216,23 +216,12 @@ export default function DashboardClient() {
         </div>
       </div>
 
-      {/* Last Month Stat Cards - Without Percentages */}
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+      {/* Last Month Stat Cards */}
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
         <StatCard
           title="Novos Alunos (Mês Passado)"
           value={dashboardData?.students?.previous?.toString() || "0"}
           description="Total de novos alunos no mês anterior"
-        />
-        <StatCard
-          title="Diferença de Novos Alunos"
-          value={
-            (dashboardData?.students?.current || 0) -
-              (dashboardData?.students?.previous || 0) >=
-            0
-              ? `+${(dashboardData?.students?.current || 0) - (dashboardData?.students?.previous || 0)}`
-              : `${(dashboardData?.students?.current || 0) - (dashboardData?.students?.previous || 0)}`
-          }
-          description="Diferença entre este mês e o anterior"
         />
         <StatCard
           title="Receita (Mês Passado)"

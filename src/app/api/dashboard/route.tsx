@@ -8,11 +8,12 @@ export async function GET() {
     const currentMonthNumber = today.getMonth();
 
     const thisMonthStart = new Date(currentYear, currentMonthNumber, 1);
+    const nextMonthStart = new Date(currentYear, currentMonthNumber + 1, 1);
     const lastMonthStart = new Date(currentYear, currentMonthNumber - 1, 1);
 
     const studentsThisMonth = await prisma.student.count({
       where: {
-        createdAt: { gte: thisMonthStart }, // gte = greater than or equal
+        createdAt: { gte: thisMonthStart },
       },
     });
 
@@ -20,54 +21,59 @@ export async function GET() {
       where: {
         createdAt: {
           gte: lastMonthStart,
-          lt: thisMonthStart, // lt = less than
+          lt: thisMonthStart,
         },
       },
     });
 
     const totalStudents = await prisma.student.count();
-    
-    // Total students at the end of last month
+
     const totalStudentsLastMonth = await prisma.student.count({
       where: {
         createdAt: { lt: thisMonthStart },
       },
     });
 
-    // Calculate total revenue from active students
+    // Calculate total revenue from students who PAID this month
     const totalRevenueResult = (await prisma.$queryRaw`
-    SELECT SUM(p.price) as total_revenue
-    FROM "Student" s
-    JOIN "Plan" p ON s."planId" = p.id
-    WHERE s."isActive" = true
-    AND (
-    (s."createdAt" >= ${thisMonthStart}) 
-    OR (s."updatedAt" >= ${thisMonthStart})
-    OR (p."updatedAt" >= ${thisMonthStart})
-  )
-`) as [{ total_revenue: string | null }];
+      SELECT SUM(p.price) as total_revenue
+      FROM "Student" s
+      JOIN "Plan" p ON s."planId" = p.id
+      WHERE s."paymentStatus" = 'PAID'
+      AND s."paymentStatusUpdatedAt" >= ${thisMonthStart}
+      AND s."paymentStatusUpdatedAt" < ${nextMonthStart}
+    `) as [{ total_revenue: string | null }];
 
     const totalRevenue = Number(totalRevenueResult[0]?.total_revenue) || 0;
 
-    // Calculate revenue from last month for comparison
+    // Calculate revenue from last month
     const lastMonthRevenueResult = (await prisma.$queryRaw`
       SELECT SUM(p.price) as total_revenue
       FROM "Student" s
       JOIN "Plan" p ON s."planId" = p.id
-      WHERE s."isActive" = true
-      AND s."createdAt" >= ${lastMonthStart}
-      AND s."createdAt" < ${thisMonthStart}
+      WHERE s."paymentStatus" = 'PAID'
+      AND s."paymentStatusUpdatedAt" >= ${lastMonthStart}
+      AND s."paymentStatusUpdatedAt" < ${thisMonthStart}
     `) as [{ total_revenue: string | null }];
 
     const lastMonthRevenue =
       Number(lastMonthRevenueResult[0]?.total_revenue) || 0;
 
-    // Calculate student change percentage based on total students
-    let changePercentage = 0;
-    if (totalStudentsLastMonth === 0) {
-      changePercentage = totalStudents > 0 ? 100 : 0;
+    // Calculate student change percentage
+    let newStudentsChangePercentage = 0;
+    if (studentsLastMonth === 0) {
+      newStudentsChangePercentage = studentsThisMonth > 0 ? 100 : 0;
     } else {
-      changePercentage =
+      newStudentsChangePercentage =
+        ((studentsThisMonth - studentsLastMonth) / studentsLastMonth) * 100;
+    }
+
+    // Calculate total students change percentage
+    let totalStudentsChangePercentage = 0;
+    if (totalStudentsLastMonth === 0) {
+      totalStudentsChangePercentage = totalStudents > 0 ? 100 : 0;
+    } else {
+      totalStudentsChangePercentage =
         ((totalStudents - totalStudentsLastMonth) / totalStudentsLastMonth) * 100;
     }
 
@@ -86,16 +92,16 @@ export async function GET() {
 
     // 1. This month, every day
     const thisMonthHistory = [];
-    const lastDayOfMonth = new Date(currentYear, currentMonthNumber + 1, 0); // Last day of current month
-    const endDate = today < lastDayOfMonth ? today : lastDayOfMonth; // Use today if month isn't over
+    const lastDayOfMonth = new Date(currentYear, currentMonthNumber + 1, 0);
+    const endDate = today < lastDayOfMonth ? today : lastDayOfMonth;
 
     const currentDate = new Date(thisMonthStart);
     while (currentDate <= endDate) {
       const periodStart = new Date(currentDate);
-      periodStart.setHours(0, 0, 0, 0); // Start of the day
+      periodStart.setHours(0, 0, 0, 0);
       
       const periodEnd = new Date(currentDate);
-      periodEnd.setHours(23, 59, 59, 999); // End of the day
+      periodEnd.setHours(23, 59, 59, 999);
       
       const newStudents = await prisma.student.count({
         where: {
@@ -118,7 +124,6 @@ export async function GET() {
         newStudents,
       });
       
-      // Move to next day
       currentDate.setDate(currentDate.getDate() + 1);
     }
 
@@ -195,7 +200,8 @@ export async function GET() {
         previous: studentsLastMonth,
         total: totalStudents,
         totalLastMonth: totalStudentsLastMonth,
-        changePercentage: Math.round(changePercentage),
+        changePercentage: Math.round(newStudentsChangePercentage),
+        totalChangePercentage: Math.round(totalStudentsChangePercentage),
       },
       revenue: {
         current: totalRevenue,

@@ -153,7 +153,7 @@ export async function POST(request: NextRequest) {
       };
       const command = new PutObjectCommand(uploadParams);
       await s3Client.send(command);
-      imageUrl = `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/uploads/${imageFileName}`;
+      imageUrl = `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/avatars/${imageFileName}`;
     }
 
     // Handle video upload to S3
