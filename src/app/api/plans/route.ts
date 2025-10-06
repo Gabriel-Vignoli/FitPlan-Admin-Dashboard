@@ -23,7 +23,6 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { name, price, description, duration } = body;
 
-    // Validations
     if (!name || !price || !description || !duration) {
       return NextResponse.json(
         { error: "Todos os campos são obrigatórios" },
@@ -31,7 +30,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Creating the plan
     const newPlan = await prisma.plan.create({
       data: {
         name,

@@ -158,7 +158,7 @@ export default function AddAlunoDialog({ onAlunoCreated }: AddAlunoDialogProps) 
           )}
 
           {success && (
-            <Alert className="border-green-600 bg-green-50 text-green-800">
+            <Alert className="border-green-600 text-green-800">
               <AlertDescription>{success}</AlertDescription>
             </Alert>
           )}

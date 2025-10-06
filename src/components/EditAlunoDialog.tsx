@@ -179,7 +179,6 @@ export default function EditAlunoDialog({ student, onStudentUpdated }: EditAluno
         weight: formData.weight ? parseFloat(formData.weight) : null,
         bodyFat: formData.bodyFat ? parseFloat(formData.bodyFat) : null,
         birthDate: formData.birthDate ? new Date(formData.birthDate).toISOString() : null,
-        // Only include password if it's not empty
         ...(formData.password && { password: formData.password }),
       };
 
@@ -237,7 +236,7 @@ export default function EditAlunoDialog({ student, onStudentUpdated }: EditAluno
           )}
 
           {success && (
-            <Alert className="border-green-600 bg-green-50 text-green-800">
+            <Alert className="border-green-600 text-green-800">
               <AlertDescription>{success}</AlertDescription>
             </Alert>
           )}

@@ -72,7 +72,6 @@ export default function AlunosPage() {
             </Button>
             <div className="flex w-auto justify-center space-x-1">
               {pageNumbers.map((pageNum) => {
-                // On mobile, show only prev/current/next
                 const showOnMobile =
                   pagination.totalPages <= 5 ||
                   pageNum === pagination.currentPage ||

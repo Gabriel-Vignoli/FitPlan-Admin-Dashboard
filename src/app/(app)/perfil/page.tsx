@@ -11,7 +11,6 @@ interface DecodedToken {
 }
 
 export default async function AdminProfilePage() {
-  // Lê o token do cookie
   const cookieStore = await cookies();
   const token = cookieStore.get("auth-token")?.value;
 
@@ -19,14 +18,12 @@ export default async function AdminProfilePage() {
     redirect("/login");
   }
 
-  // Verifica e decodifica o token
   const decoded = verifyToken(token) as DecodedToken | null;
 
   if (!decoded) {
     redirect("/login");
   }
 
-  // Busca o admin usando o ID do token 
   const admin = await prisma.admin.findUnique({
     where: { id: decoded.id },
     select: {

@@ -11,7 +11,6 @@ export async function PUT(
   try {
     const { id } = await params;
 
-    // Check if exercise exists
     const existingExercise = await prisma.exercise.findUnique({
       where: { id },
     });
@@ -130,9 +129,6 @@ export async function DELETE(
       );
     }
 
-    // Não há mais arquivos locais para excluir, apenas remove do banco
-
-    // Delete the exercise from database
     await prisma.exercise.delete({
       where: { id },
     });

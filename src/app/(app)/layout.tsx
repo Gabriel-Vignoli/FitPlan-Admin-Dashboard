@@ -19,7 +19,6 @@ export default async function AppLayout({
       <div className="flex h-screen bg-black">
         <Sidebar admin={admin} />
         <main className="flex-1 overflow-auto md:ml-0">
-          {/* Add padding-top on mobile to account for hamburger button */}
           <div className="md:hidden h-16"></div>
           {children}
         </main>
