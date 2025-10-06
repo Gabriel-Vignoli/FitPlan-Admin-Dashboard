@@ -33,6 +33,23 @@ export default function ExerciseItem({
   onClick,
   className = "",
 }: ExerciseItemProps) {
+  const formatExerciseName = (name: string) => {
+    const words = name.trim().split(/\s+/);
+    if (words.length >= 2) {
+      const midpoint = Math.ceil(words.length / 2);
+      const firstLine = words.slice(0, midpoint).join(" ");
+      const secondLine = words.slice(midpoint).join(" ");
+      return (
+        <>
+          {firstLine}
+          <br />
+          {secondLine}
+        </>
+      );
+    }
+    return name;
+  };
+
   return (
     <div
       onClick={onClick}
@@ -42,13 +59,15 @@ export default function ExerciseItem({
         {/* Image/Icon */}
         <div className="mr-3 flex-shrink-0 relative">
           {workoutExercise.exercise.imageUrl ? (
-            <Image
-              src={workoutExercise.exercise.imageUrl}
-              alt={workoutExercise.exercise.name}
-              width={40}
-              height={40}
-              className="rounded-[8px]"
-            />
+            <div className="h-10 w-10 rounded-[8px] overflow-hidden bg-[#1a1a1a]">
+              <Image
+                src={workoutExercise.exercise.imageUrl}
+                alt={workoutExercise.exercise.name}
+                width={40}
+                height={40}
+                className="h-full w-full object-cover"
+              />
+            </div>
           ) : (
             <div className="flex h-10 w-10 items-center justify-center rounded-[8px] bg-[#1a1a1a]">
               <Dumbbell className="h-5 w-5 text-white/70" />
@@ -58,10 +77,10 @@ export default function ExerciseItem({
 
         {/* Exercise info */}
         <div className="min-w-0 flex-1 relative">
-          <div className="truncate font-medium">
-            {workoutExercise.exercise.name}
+          <div className="font-medium leading-tight">
+            {formatExerciseName(workoutExercise.exercise.name)}
           </div>
-          <div className="text-xs text-white/70 md:text-sm">
+          <div className="text-xs text-white/70 md:text-sm mt-0.5">
             ({workoutExercise.exercise.targetMuscle})
           </div>
           
