@@ -13,9 +13,16 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Plus } from "lucide-react";
 import { formatCPF, formatPhone } from "@/lib/utils/formatters";
+import { validateBirthDateBR } from "@/lib/utils/validations";
 
 interface Plan {
   id: string;
@@ -27,7 +34,9 @@ interface AddAlunoDialogProps {
   onAlunoCreated?: () => void;
 }
 
-export default function AddAlunoDialog({ onAlunoCreated }: AddAlunoDialogProps) {
+export default function AddAlunoDialog({
+  onAlunoCreated,
+}: AddAlunoDialogProps) {
   const [open, setOpen] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
@@ -62,21 +71,32 @@ export default function AddAlunoDialog({ onAlunoCreated }: AddAlunoDialogProps) 
   }, []);
 
   const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [field]: value
+      [field]: value,
     }));
   };
 
   const handleCPFChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const formatted = formatCPF(e.target.value);
-    handleInputChange('cpf', formatted);
+    handleInputChange("cpf", formatted);
   };
 
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const inputValue = e.target.value;
     const formatted = formatPhone(inputValue);
-    handleInputChange('phone', formatted);
+    handleInputChange("phone", formatted);
+  };
+
+  const handleBirthDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let val = e.target.value.replace(/\D/g, "");
+    if (val.length > 8) val = val.slice(0, 8);
+    if (val.length >= 5) {
+      val = val.replace(/(\d{2})(\d{2})(\d{1,4})/, "$1/$2/$3");
+    } else if (val.length >= 3) {
+      val = val.replace(/(\d{2})(\d{1,2})/, "$1/$2");
+    }
+    handleInputChange("birthDate", val);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -85,13 +105,24 @@ export default function AddAlunoDialog({ onAlunoCreated }: AddAlunoDialogProps) 
     setError("");
     setSuccess("");
 
+    const birthValidation = validateBirthDateBR(formData.birthDate);
+    if (!birthValidation.valid) {
+      setError(birthValidation.error || "Data de nascimento inválida");
+      setIsLoading(false);
+      return;
+    }
+
     try {
+      const isoBirthDate = birthValidation.date!.toISOString().split("T")[0];
+
+      const payload = { ...formData, birthDate: isoBirthDate };
+
       const response = await fetch("/api/alunos", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(payload),
       });
 
       const data = await response.json();
@@ -106,7 +137,7 @@ export default function AddAlunoDialog({ onAlunoCreated }: AddAlunoDialogProps) 
           cpf: "",
           planId: "",
         });
-        
+
         if (onAlunoCreated) {
           setTimeout(() => {
             onAlunoCreated();
@@ -138,18 +169,20 @@ export default function AddAlunoDialog({ onAlunoCreated }: AddAlunoDialogProps) 
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         <Button className="text-white">
-          <Plus className="w-4 h-4" />
+          <Plus className="h-4 w-4" />
           Adicionar Aluno
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[600px] bg-gradient-to-br from-black to-[#101010] rounded-[8px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-h-[90vh] overflow-y-auto rounded-[8px] bg-gradient-to-br from-black to-[#101010] sm:max-w-[600px]">
         <DialogHeader>
-          <DialogTitle className="text-white text-xl font-semibold">Adicionar Novo Aluno</DialogTitle>
+          <DialogTitle className="text-xl font-semibold text-white">
+            Adicionar Novo Aluno
+          </DialogTitle>
           <DialogDescription className="text-gray-400">
             Preencha os dados para criar uma nova conta de aluno.
           </DialogDescription>
         </DialogHeader>
-        
+
         <form onSubmit={handleSubmit} className="space-y-4">
           {error && (
             <Alert variant="destructive">
@@ -165,10 +198,7 @@ export default function AddAlunoDialog({ onAlunoCreated }: AddAlunoDialogProps) 
 
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div className="space-y-2">
-              <Label
-                htmlFor="name"
-                className="text-sm font-medium text-white"
-              >
+              <Label htmlFor="name" className="text-sm font-medium text-white">
                 Nome Completo
               </Label>
               <Input
@@ -178,16 +208,13 @@ export default function AddAlunoDialog({ onAlunoCreated }: AddAlunoDialogProps) 
                 required
                 placeholder="Nome completo do aluno"
                 value={formData.name}
-                onChange={(e) => handleInputChange('name', e.target.value)}
+                onChange={(e) => handleInputChange("name", e.target.value)}
                 className="border"
               />
             </div>
 
             <div className="space-y-2">
-              <Label
-                htmlFor="email"
-                className="text-sm font-medium text-white"
-              >
+              <Label htmlFor="email" className="text-sm font-medium text-white">
                 Email
               </Label>
               <Input
@@ -197,16 +224,13 @@ export default function AddAlunoDialog({ onAlunoCreated }: AddAlunoDialogProps) 
                 required
                 placeholder="email@exemplo.com"
                 value={formData.email}
-                onChange={(e) => handleInputChange('email', e.target.value)}
+                onChange={(e) => handleInputChange("email", e.target.value)}
                 className="border"
               />
             </div>
 
             <div className="space-y-2">
-              <Label
-                htmlFor="phone"
-                className="text-sm font-medium text-white"
-              >
+              <Label htmlFor="phone" className="text-sm font-medium text-white">
                 Telefone
               </Label>
               <Input
@@ -222,10 +246,7 @@ export default function AddAlunoDialog({ onAlunoCreated }: AddAlunoDialogProps) 
             </div>
 
             <div className="space-y-2">
-              <Label
-                htmlFor="cpf"
-                className="text-sm font-medium text-white"
-              >
+              <Label htmlFor="cpf" className="text-sm font-medium text-white">
                 CPF
               </Label>
               <Input
@@ -250,10 +271,12 @@ export default function AddAlunoDialog({ onAlunoCreated }: AddAlunoDialogProps) 
               <Input
                 id="birthDate"
                 name="birthDate"
-                type="date"
+                type="text"
+                inputMode="numeric"
+                placeholder="dd/mm/aaaa"
                 required
                 value={formData.birthDate}
-                onChange={(e) => handleInputChange('birthDate', e.target.value)}
+                onChange={handleBirthDateChange}
                 className="border"
               />
             </div>
@@ -267,11 +290,17 @@ export default function AddAlunoDialog({ onAlunoCreated }: AddAlunoDialogProps) 
               </Label>
               <Select
                 value={formData.planId}
-                onValueChange={(value) => handleInputChange('planId', value)}
+                onValueChange={(value) => handleInputChange("planId", value)}
                 required
               >
-                <SelectTrigger className="rounded-[8px] border-white/40 w-full">
-                  <SelectValue placeholder={isLoadingPlans ? "Carregando planos..." : "Selecione um plano"} />
+                <SelectTrigger className="w-full rounded-[8px] border-white/40">
+                  <SelectValue
+                    placeholder={
+                      isLoadingPlans
+                        ? "Carregando planos..."
+                        : "Selecione um plano"
+                    }
+                  />
                 </SelectTrigger>
                 <SelectContent>
                   {plans.map((plan) => (

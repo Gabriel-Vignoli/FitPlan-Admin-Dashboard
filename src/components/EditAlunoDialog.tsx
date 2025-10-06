@@ -13,10 +13,17 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Edit } from "lucide-react";
 import { formatCPF, formatPhone } from "@/lib/utils/formatters";
+import { validateBirthDateBR } from "@/lib/utils/validations";
 
 interface Plan {
   id: string;
@@ -46,14 +53,25 @@ interface EditAlunoDialogProps {
   onStudentUpdated: (updatedStudent: Student) => void;
 }
 
-export default function EditAlunoDialog({ student, onStudentUpdated }: EditAlunoDialogProps) {
+export default function EditAlunoDialog({
+  student,
+  onStudentUpdated,
+}: EditAlunoDialogProps) {
   const [open, setOpen] = useState(false);
   const [formData, setFormData] = useState({
     name: student.name || "",
     email: student.email || "",
     password: student.password || "",
     phone: student.phone || "",
-    birthDate: student.birthDate ? new Date(student.birthDate).toISOString().split('T')[0] : "",
+    birthDate: student.birthDate
+      ? (() => {
+          const d = new Date(student.birthDate);
+          const day = String(d.getDate()).padStart(2, "0");
+          const month = String(d.getMonth() + 1).padStart(2, "0");
+          const year = d.getFullYear();
+          return `${day}/${month}/${year}`;
+        })()
+      : "",
     cpf: student.cpf || "",
     height: student.height?.toString() || "",
     weight: student.weight?.toString() || "",
@@ -67,9 +85,9 @@ export default function EditAlunoDialog({ student, onStudentUpdated }: EditAluno
   const [hasChanges, setHasChanges] = useState(false);
 
   const paymentStatusOptions = [
-    { value: 'PENDING', label: 'Aguardando confirmação' },
-    { value: 'PAID', label: 'Pagamento confirmado' },
-    { value: 'UNPAID', label: 'Não pago' },
+    { value: "PENDING", label: "Aguardando confirmação" },
+    { value: "PAID", label: "Pagamento confirmado" },
+    { value: "UNPAID", label: "Não pago" },
   ];
 
   const [plans, setPlans] = useState<Plan[]>([]);
@@ -85,7 +103,15 @@ export default function EditAlunoDialog({ student, onStudentUpdated }: EditAluno
         email: student.email || "",
         password: student.password || "",
         phone: student.phone || "",
-        birthDate: student.birthDate ? new Date(student.birthDate).toISOString().split('T')[0] : "",
+        birthDate: student.birthDate
+          ? (() => {
+              const d = new Date(student.birthDate);
+              const day = String(d.getDate()).padStart(2, "0");
+              const month = String(d.getMonth() + 1).padStart(2, "0");
+              const year = d.getFullYear();
+              return `${day}/${month}/${year}`;
+            })()
+          : "",
         cpf: student.cpf || "",
         height: student.height?.toString() || "",
         weight: student.weight?.toString() || "",
@@ -112,21 +138,22 @@ export default function EditAlunoDialog({ student, onStudentUpdated }: EditAluno
     const bodyFatChanged = formData.bodyFat !== originalData.bodyFat;
     const isActiveChanged = formData.isActive !== originalData.isActive;
     const planIdChanged = formData.planId !== originalData.planId;
-    const paymentStatusChanged = formData.paymentStatus !== originalData.paymentStatus;
+    const paymentStatusChanged =
+      formData.paymentStatus !== originalData.paymentStatus;
 
     setHasChanges(
       nameChanged ||
-      emailChanged ||
-      passwordChanged ||
-      phoneChanged ||
-      birthDateChanged ||
-      cpfChanged ||
-      heightChanged ||
-      weightChanged ||
-      bodyFatChanged ||
-      isActiveChanged ||
-      planIdChanged ||
-      paymentStatusChanged
+        emailChanged ||
+        passwordChanged ||
+        phoneChanged ||
+        birthDateChanged ||
+        cpfChanged ||
+        heightChanged ||
+        weightChanged ||
+        bodyFatChanged ||
+        isActiveChanged ||
+        planIdChanged ||
+        paymentStatusChanged,
     );
   }, [formData, originalData]);
 
@@ -149,21 +176,32 @@ export default function EditAlunoDialog({ student, onStudentUpdated }: EditAluno
   }, []);
 
   const handleInputChange = (field: string, value: string | boolean) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [field]: value
+      [field]: value,
     }));
   };
 
   const handleCPFChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const formatted = formatCPF(e.target.value);
-    handleInputChange('cpf', formatted);
+    handleInputChange("cpf", formatted);
   };
 
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const inputValue = e.target.value;
     const formatted = formatPhone(inputValue);
-    handleInputChange('phone', formatted);
+    handleInputChange("phone", formatted);
+  };
+
+  const handleBirthDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let val = e.target.value.replace(/\D/g, "");
+    if (val.length > 8) val = val.slice(0, 8);
+    if (val.length >= 5) {
+      val = val.replace(/(\d{2})(\d{2})(\d{1,4})/, "$1/$2/$3");
+    } else if (val.length >= 3) {
+      val = val.replace(/(\d{2})(\d{1,2})/, "$1/$2");
+    }
+    handleInputChange("birthDate", val);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -171,6 +209,12 @@ export default function EditAlunoDialog({ student, onStudentUpdated }: EditAluno
     setIsLoading(true);
     setError("");
     setSuccess("");
+    const birthValidation = validateBirthDateBR(formData.birthDate);
+    if (!birthValidation.valid) {
+      setError(birthValidation.error || "Data de nascimento inválida");
+      setIsLoading(false);
+      return;
+    }
 
     try {
       const submitData = {
@@ -178,7 +222,9 @@ export default function EditAlunoDialog({ student, onStudentUpdated }: EditAluno
         height: formData.height ? parseFloat(formData.height) : null,
         weight: formData.weight ? parseFloat(formData.weight) : null,
         bodyFat: formData.bodyFat ? parseFloat(formData.bodyFat) : null,
-        birthDate: formData.birthDate ? new Date(formData.birthDate).toISOString() : null,
+        birthDate: birthValidation.date
+          ? birthValidation.date.toISOString()
+          : null,
         ...(formData.password && { password: formData.password }),
       };
 
@@ -215,16 +261,22 @@ export default function EditAlunoDialog({ student, onStudentUpdated }: EditAluno
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" className="flex-1 hover:bg-blue-600/20 hover:text-white text-blue-400 border border-blue-500/40 hover:border-blue-500/60">
-          <Edit className="w-4 h-4" />
+        <Button
+          variant="outline"
+          className="flex-1 border border-blue-500/40 text-blue-400 hover:border-blue-500/60 hover:bg-blue-600/20 hover:text-white"
+        >
+          <Edit className="h-4 w-4" />
           Editar
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-4xl bg-gradient-to-br from-black to-[#101010] rounded-[8px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-h-[90vh] overflow-y-auto rounded-[8px] bg-gradient-to-br from-black to-[#101010] sm:max-w-4xl">
         <DialogHeader>
-          <DialogTitle className="text-white text-xl font-semibold">Editar Aluno</DialogTitle>
+          <DialogTitle className="text-xl font-semibold text-white">
+            Editar Aluno
+          </DialogTitle>
           <DialogDescription className="text-gray-400">
-            Atualize os dados do aluno {student.name}. Clique em salvar quando terminar.
+            Atualize os dados do aluno {student.name}. Clique em salvar quando
+            terminar.
           </DialogDescription>
         </DialogHeader>
 
@@ -253,7 +305,7 @@ export default function EditAlunoDialog({ student, onStudentUpdated }: EditAluno
                 required
                 placeholder="Nome completo do aluno"
                 value={formData.name}
-                onChange={(e) => handleInputChange('name', e.target.value)}
+                onChange={(e) => handleInputChange("name", e.target.value)}
                 className="border"
               />
             </div>
@@ -269,13 +321,16 @@ export default function EditAlunoDialog({ student, onStudentUpdated }: EditAluno
                 required
                 placeholder="email@exemplo.com"
                 value={formData.email}
-                onChange={(e) => handleInputChange('email', e.target.value)}
+                onChange={(e) => handleInputChange("email", e.target.value)}
                 className="border"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password" className="text-sm font-medium text-white">
+              <Label
+                htmlFor="password"
+                className="text-sm font-medium text-white"
+              >
                 Senha
               </Label>
               <Input
@@ -285,7 +340,7 @@ export default function EditAlunoDialog({ student, onStudentUpdated }: EditAluno
                 required
                 placeholder="Senha do aluno"
                 value={formData.password}
-                onChange={(e) => handleInputChange('password', e.target.value)}
+                onChange={(e) => handleInputChange("password", e.target.value)}
                 className="border"
               />
             </div>
@@ -322,22 +377,30 @@ export default function EditAlunoDialog({ student, onStudentUpdated }: EditAluno
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="birthDate" className="text-sm font-medium text-white">
+              <Label
+                htmlFor="birthDate"
+                className="text-sm font-medium text-white"
+              >
                 Data de Nascimento
               </Label>
               <Input
                 id="birthDate"
                 name="birthDate"
-                type="date"
+                type="text"
+                inputMode="numeric"
+                placeholder="dd/mm/aaaa"
                 required
                 value={formData.birthDate}
-                onChange={(e) => handleInputChange('birthDate', e.target.value)}
+                onChange={handleBirthDateChange}
                 className="border"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="height" className="text-sm font-medium text-white">
+              <Label
+                htmlFor="height"
+                className="text-sm font-medium text-white"
+              >
                 Altura (cm)
               </Label>
               <Input
@@ -349,13 +412,16 @@ export default function EditAlunoDialog({ student, onStudentUpdated }: EditAluno
                 max="300"
                 placeholder="170.5"
                 value={formData.height}
-                onChange={(e) => handleInputChange('height', e.target.value)}
+                onChange={(e) => handleInputChange("height", e.target.value)}
                 className="border"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="weight" className="text-sm font-medium text-white">
+              <Label
+                htmlFor="weight"
+                className="text-sm font-medium text-white"
+              >
                 Peso (kg)
               </Label>
               <Input
@@ -367,13 +433,16 @@ export default function EditAlunoDialog({ student, onStudentUpdated }: EditAluno
                 max="500"
                 placeholder="70.5"
                 value={formData.weight}
-                onChange={(e) => handleInputChange('weight', e.target.value)}
+                onChange={(e) => handleInputChange("weight", e.target.value)}
                 className="border"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="bodyFat" className="text-sm font-medium text-white">
+              <Label
+                htmlFor="bodyFat"
+                className="text-sm font-medium text-white"
+              >
                 Gordura Corporal (%)
               </Label>
               <Input
@@ -385,22 +454,31 @@ export default function EditAlunoDialog({ student, onStudentUpdated }: EditAluno
                 max="100"
                 placeholder="15.5"
                 value={formData.bodyFat}
-                onChange={(e) => handleInputChange('bodyFat', e.target.value)}
+                onChange={(e) => handleInputChange("bodyFat", e.target.value)}
                 className="border"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="planId" className="text-sm font-medium text-white">
+              <Label
+                htmlFor="planId"
+                className="text-sm font-medium text-white"
+              >
                 Plano
               </Label>
               <Select
                 value={formData.planId}
-                onValueChange={(value) => handleInputChange('planId', value)}
+                onValueChange={(value) => handleInputChange("planId", value)}
                 required
               >
-                <SelectTrigger className="rounded-[8px] border-white/40 w-full">
-                  <SelectValue placeholder={isLoadingPlans ? "Carregando planos..." : "Selecione um plano"} />
+                <SelectTrigger className="w-full rounded-[8px] border-white/40">
+                  <SelectValue
+                    placeholder={
+                      isLoadingPlans
+                        ? "Carregando planos..."
+                        : "Selecione um plano"
+                    }
+                  />
                 </SelectTrigger>
                 <SelectContent>
                   {plans.map((plan) => (
@@ -413,15 +491,20 @@ export default function EditAlunoDialog({ student, onStudentUpdated }: EditAluno
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="paymentStatus" className="text-sm font-medium text-white">
+              <Label
+                htmlFor="paymentStatus"
+                className="text-sm font-medium text-white"
+              >
                 Status de Pagamento
               </Label>
               <Select
                 value={formData.paymentStatus}
-                onValueChange={(value) => handleInputChange('paymentStatus', value)}
+                onValueChange={(value) =>
+                  handleInputChange("paymentStatus", value)
+                }
                 required
               >
-                <SelectTrigger className="rounded-[8px] border-white/40 w-full">
+                <SelectTrigger className="w-full rounded-[8px] border-white/40">
                   <SelectValue placeholder="Selecione o status" />
                 </SelectTrigger>
                 <SelectContent>
@@ -435,14 +518,19 @@ export default function EditAlunoDialog({ student, onStudentUpdated }: EditAluno
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="isActive" className="text-sm font-medium text-white">
+              <Label
+                htmlFor="isActive"
+                className="text-sm font-medium text-white"
+              >
                 Status do Aluno
               </Label>
               <div className="flex items-center space-x-2">
                 <Switch
                   id="isActive"
                   checked={formData.isActive}
-                  onCheckedChange={(checked) => handleInputChange('isActive', checked)}
+                  onCheckedChange={(checked) =>
+                    handleInputChange("isActive", checked)
+                  }
                 />
                 <Label htmlFor="isActive" className="text-sm text-white/70">
                   {formData.isActive ? "Ativo" : "Inativo"}

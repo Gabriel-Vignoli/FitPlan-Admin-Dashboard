@@ -56,3 +56,50 @@ export function isValidCPF(cpf: string): boolean {
   
   return true
 }
+
+// Validate Brazilian birth date in dd/mm/yyyy format
+export function validateBirthDateBR(dateStr: string): { valid: boolean; error?: string; date?: Date } {
+  if (!dateStr || typeof dateStr !== "string") {
+    return { valid: false, error: "Data inválida" };
+  }
+
+  const match = dateStr.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+  if (!match) {
+    return { valid: false, error: "Formato de data inválido. Use dd/mm/aaaa" };
+  }
+
+  const day = parseInt(match[1], 10);
+  const month = parseInt(match[2], 10) - 1; 
+  const year = parseInt(match[3], 10);
+
+  const date = new Date(year, month, day);
+
+  if (date.getFullYear() !== year || date.getMonth() !== month || date.getDate() !== day) {
+    return { valid: false, error: "Data inválida" };
+  }
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const candidate = new Date(date.getTime());
+  candidate.setHours(0, 0, 0, 0);
+
+  if (candidate > today) {
+    return { valid: false, error: "Data não pode ser no futuro" };
+  }
+
+  let age = today.getFullYear() - year;
+  const m = today.getMonth() - month;
+  if (m < 0 || (m === 0 && today.getDate() < day)) {
+    age--;
+  }
+
+  if (age > 100) {
+    return { valid: false, error: "Idade não pode ser maior que 100 anos" };
+  }
+
+  if (age < 0) {
+    return { valid: false, error: "Data inválida" };
+  }
+
+  return { valid: true, date };
+}
