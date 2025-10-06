@@ -6,7 +6,7 @@ const nextConfig: NextConfig = {
       {
         protocol: "https",
         hostname: "meuappfitplan.s3.sa-east-1.amazonaws.com",
-        pathname: "/uploads/**",
+        pathname: "/**",
       },
       {
         protocol: "http",
