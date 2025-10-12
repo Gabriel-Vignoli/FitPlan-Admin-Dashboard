@@ -1,36 +1,122 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# FitPlan Admin Dashboard
 
-## Getting Started
+Administration dashboard for FitPlan built with Next.js, Prisma and AWS S3 for media uploads.
 
-First, run the development server:
+## Contents
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- Quick start
+- Prerequisites
+- Environment variables
+- Running
+- Building for production
+- Troubleshooting
+- Notes about date input mask and validations
+
+## Quick start
+
+1. Clone the repository and open it:
+
+   ```powershell
+   git clone <repo-url> .
+   cd admin-dashboard
+   ```
+
+2. Install dependencies:
+
+   ```powershell
+   npm install
+   ```
+
+3. Create a `.env` file in the project root (see example below).
+
+4. Generate Prisma client (postinstall runs this automatically):
+
+   ```powershell
+   npx prisma generate
+   ```
+
+5. Start the dev server:
+
+   ```powershell
+   npm run dev
+   ```
+
+   Open http://localhost:3000 in your browser.
+
+## Prerequisites
+
+- Node.js (18+ recommended)
+- npm (or pnpm/yarn if you prefer)
+- A PostgreSQL-compatible database (the project uses Neon in examples)
+- AWS S3 bucket and IAM credentials with PutObject and HeadBucket permissions
+
+## Environment variables (.env)
+
+Create a `.env` file in the project root. Example values (do NOT commit secrets):
+
+```
+DATABASE_URL="postgresql://USER:PASSWORD@HOST:PORT/DATABASE?sslmode=require"
+JWT_SECRET="super-secret"
+
+AWS_ACCESS_KEY_ID=AKIA...
+AWS_SECRET_ACCESS_KEY=...
+AWS_BUCKET_NAME=your-bucket-name
+AWS_REGION=sa-east-1
+
+RESEND_API_KEY=re_...
+NODE_ENV="development"
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Notes:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` must match IAM credentials that can access the bucket.
+- Ensure the `AWS_REGION` matches the bucket region.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Running the app
 
-## Learn More
+- Dev: `npm run dev`
+- Build: `npm run build`
+- Start (production): `npm run start`
+- Lint: `npm run lint`
 
-To learn more about Next.js, take a look at the following resources:
+## API endpoints
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- `GET /api/alunos` - list students (pagination & search)
+- `POST /api/alunos` - create student (expects JSON)
+- `PUT /api/alunos/:id` - update student
+- `GET /api/exercises` - list exercises (pagination & search)
+- `POST /api/exercises` - create exercise (multipart/form-data with optional `image` and `video` files)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Refer to code in `src/app/api` for full details.
 
-## Deploy on Vercel
+## Troubleshooting - AWS S3 SignatureDoesNotMatch
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+If you see `SignatureDoesNotMatch` when uploading to S3 (`POST /api/exercises`), check:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. AWS credentials: ensure `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` are correct and have permissions for the bucket.
+2. Region: `AWS_REGION` must match the bucket's region.
+3. System clock: ensure the server's clock is close to real time. Large clock skew can break AWS signature validation.
+4. Bucket name and request path: confirm `AWS_BUCKET_NAME` is correct and the code uses consistent object keys (this project uploads to `uploads/` in S3).
+
+## Date input and validation
+
+The UI expects birth dates in Brazilian format `dd/mm/yyyy` (masked on the Add/Edit student dialogs). The API receives `birthDate` as an ISO `yyyy-mm-dd` string converted from the validated user input. Validation rules:
+
+- Format must be `dd/mm/yyyy`.
+- Date cannot be in the future.
+- Age cannot be greater than 100 years.
+
+## Notes
+
+- Prisma schema and migrations live in `prisma/`.
+- S3 client config is in `config/aws.ts`.
+- Date mask and validation were added to `src/components/CreateAlunoDialog.tsx` and `src/components/EditAlunoDialog.tsx`.
+
+If you'd like, I can also:
+
+- Add unit tests for the `validateBirthDateBR` function.
+- Add automated checks to the CI pipeline for lints and tests.
+
+---
+
+If you want any section expanded, say which area and I'll update the README.
