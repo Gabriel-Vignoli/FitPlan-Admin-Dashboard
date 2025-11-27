@@ -148,9 +148,12 @@ export async function POST(request: NextRequest) {
     const { name, email, phone, birthDate, cpf, planId } = body;
 
     // Validation
-    if (!name || !email || !phone || !birthDate || !cpf || !planId) {
+    if (!name || !email || !phone || !birthDate || !planId) {
       return NextResponse.json(
-        { error: "Todos os campos são obrigatórios" },
+        {
+          error:
+            "Todos os campos obrigatórios devem ser preenchidos (exceto CPF)",
+        },
         { status: 400 },
       );
     }
@@ -184,13 +187,15 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check if the cpf is valid
-    const cpfValidation = isValidCPF(cpf);
-    if (!cpfValidation) {
-      return NextResponse.json(
-        { error: "Insira um CPF válido " },
-        { status: 400 },
-      );
+    // Check if the cpf is valid (only if provided)
+    if (cpf && cpf.trim() !== "") {
+      const cpfValidation = isValidCPF(cpf);
+      if (!cpfValidation) {
+        return NextResponse.json(
+          { error: "Insira um CPF válido" },
+          { status: 400 },
+        );
+      }
     }
 
     // Check if the plan exists
@@ -215,16 +220,16 @@ export async function POST(request: NextRequest) {
         phone,
         birthDate: new Date(birthDate),
         password: password,
-        cpf,
+        cpf: cpf && cpf.trim() !== "" ? cpf : null,
         planId,
       },
     });
 
     await resend.emails.send({
-  from: "Academia Montanini <noreply@montanini.xyz>",
-  to: email,
-  subject: "🎉 Bem-vindo à Academia Montanini!",
-  html: `
+      from: "Academia Montanini <noreply@montanini.xyz>",
+      to: email,
+      subject: "🎉 Bem-vindo à Academia Montanini!",
+      html: `
     <!DOCTYPE html>
     <html>
       <head>
@@ -294,7 +299,7 @@ export async function POST(request: NextRequest) {
       </body>
     </html>
   `,
-});
+    });
 
     return NextResponse.json(
       { message: "Usuário criado com sucesso" },

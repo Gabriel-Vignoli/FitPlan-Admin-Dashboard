@@ -253,7 +253,6 @@ export default function AddAlunoDialog({
                 id="cpf"
                 name="cpf"
                 type="text"
-                required
                 placeholder="000.000.000-00"
                 value={formData.cpf}
                 onChange={handleCPFChange}

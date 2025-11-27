@@ -47,38 +47,38 @@ export function formatPhone(phone: string): string {
   return phone;
 }
 
- export function formatCPF(value: string): string {
-    const numericValue = value.replace(/\D/g, '');
-    
-    // Apply CPF mask: 000.000.000-00
-    if (numericValue.length <= 11) {
-      return numericValue
-        .replace(/(\d{3})(\d)/, '$1.$2')
-        .replace(/(\d{3})(\d)/, '$1.$2')
-        .replace(/(\d{3})(\d{1,2})/, '$1-$2');
-    }
-    return value;
-  };
+export function formatCPF(value?: string): string {
+  if (!value) return "";
+  const numericValue = value.replace(/\D/g, "");
 
-  
+  // Apply CPF mask: 000.000.000-00
+  if (numericValue.length <= 11) {
+    return numericValue
+      .replace(/(\d{3})(\d)/, "$1.$2")
+      .replace(/(\d{3})(\d)/, "$1.$2")
+      .replace(/(\d{3})(\d{1,2})/, "$1-$2");
+  }
+  return value;
+}
+
 export function formatDayofWeekToDay(day: number) {
   switch (day) {
     case 1:
-      return "Segunda"
+      return "Segunda";
     case 2:
-      return "Terça"
+      return "Terça";
     case 3:
-      return "Quarta"
+      return "Quarta";
     case 4:
-      return "Quinta"
+      return "Quinta";
     case 5:
-      return "Sexta"
+      return "Sexta";
     case 6:
-      return "Sabado"
+      return "Sabado";
     case 7:
-      return "Domingo"
+      return "Domingo";
     default:
-      return "Dia inválido"
+      return "Dia inválido";
   }
 }
 
@@ -110,6 +110,6 @@ export function formatDayToNumber(dayName: string): number {
     case "domingo-feira":
       return 7;
     default:
-      return 0; 
+      return 0;
   }
 }
